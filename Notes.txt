@@ -1,0 +1,3 @@
+Notes de màj :
+	- 271213 Ajout des dernières modifs au code du moteur physique. Ajout de la recherche évoluée du modèle cylindre (Non fini).
+	
