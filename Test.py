@@ -5,6 +5,7 @@ from MoteurPhysique import *
 from Physique import *
 
 print("test")
+
 server = ModbusServer()
 #server.setValue(2, 255 * 255)
 server.set_prop_front_left(100) # avant gauche
