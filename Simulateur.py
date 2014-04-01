@@ -1,10 +1,6 @@
-from time import sleep, localtime, time
-from Server import *
-from MoteurPhysique import *
+from time import localtime
 from Application import *
-from View import Sight
 
-#from View import *
 __author__ = 'Adrien'
 
 def define_file():
@@ -22,20 +18,24 @@ def define_file():
 class Simulateur(Thread):
     def __init__(self):
         super().__init__()
-        self.window = Application()  # Interface Graphique
-        self.server = ModbusServer(self)  # Serveur
-        self.robot = Robot()
-        self.physique = MoteurPhysique(self, 0.01, 50, 9.81, 1)  # Moteur Physique
+        print("starting main init")
+        self.robot = Robot(0)
+        self.server = ModbusServer()  # Serveur
+        self.physique = MoteurPhysique(self.robot, self.server, 0.01, 50, 9.81, 1)  # Moteur Physique
+        self.window = Application(self.physique)  # Interface Graphique
+        self.window.start()
         self.started = False
         self.filename = define_file()
-        self.init_time=time()
-        self.vision = Sight(self.physique)
-        while not self.window.started:
+        self.init_time = time.time()
+        print("HI")
+        while not self.window.inited:
+            print(self.window.inited)
             sleep(0.05)
+        print("starting")
         self.start()
 
     def log(self):
-        ti = str(time() - self.init_time) + ' '
+        ti = str(time.time() - self.init_time) + ' '
         x = str(self.robot.center[0]) + ' '
         y = str(self.robot.center[1]) + ' '
         z = str(self.robot.center[2]) + ' '
@@ -45,9 +45,9 @@ class Simulateur(Thread):
         vx = str(self.robot.speed[0]) + ' '
         vy = str(self.robot.speed[1]) + ' '
         vz = str(self.robot.speed[2]) + ' '
-        omx = str(self.robot.rotation[0]) + ' '
-        omy = str(self.robot.rotation[1]) + ' '
-        omz = str(self.robot.rotation[2])
+        omx = str(self.robot.wrotation[0]) + ' '
+        omy = str(self.robot.wrotation[1]) + ' '
+        omz = str(self.robot.wrotation[2])
         with open(self.filename, 'a') as f:
             f.write(ti + x + y + z + theta + phi + psi + vx + vy + vz + omx + omy + omz + '\n')
 
@@ -68,7 +68,3 @@ class Simulateur(Thread):
 if __name__ == '__main__':
     sim = Simulateur()
     sim.robot.speed[0] = 1
-    sim.start()
-    sleep(3)
-    sim.stop()
-    sim.join()

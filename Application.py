@@ -1,6 +1,7 @@
 from tkinter import *
 import math
 import os
+from threading import Thread
 from ServerTricked import *
 from MoteurPhysique import *
 from Physique import *
@@ -13,11 +14,13 @@ ligne = 4
 colunne = 0
 
 
-class Application(Frame):
+class Application(Thread,Frame):
 
-    def __init__(self):
-        self.robot=Robot(0) # a remplacer par simu.robot
-        self.started=False
+    def __init__(self, moteur):
+        super(Application, self).__init__()
+        self.moteur=moteur
+        self.robot=moteur.robot # a remplacer par simu.robot
+        self.inited = False
         self.master = Tk()
         Frame.__init__(self, self.master)
         self.master.title("Simulateur")
@@ -53,9 +56,15 @@ class Application(Frame):
         self.param_balleJau_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.param_FormTube_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.update()
+
+
+
+    def run(self):
         self.master.mainloop()
+        print("Trying unknown rob1 & rob2")
         self.rob1()
         self.rob2()
+        print("done")
 
     def update(self):       # mise a jour des datas
         self.dataCAP.set(str(self.robot.orientation[2]))
@@ -141,18 +150,16 @@ class Application(Frame):
         self.button_camera.config(state = DISABLED)
 
     def press_cameraRobot(self):
-        server = ModbusServer()
-        print("initialisation du serveur :\nEtat de %s:"%server.__class__.__name__)
-        moteur = MoteurPhysique(self.robot, server, 0, 100, 9.81, 1)
-        moteur.obstacles.append(Cylindre(0, -3,-11,0.3,10,180,0,0))
-        moteur.obstacles[-1].texture=[1.,1.,1.]
-        moteur.obstacles.append(Cylindre(2, -3,-11,0.3,20,0,0,0))
-        moteur.obstacles[-1].texture=[0.8,0.2,0.1]
-        moteur.obstacles.append(Pave(1,0,-6,45,0,0,1, 0.333, 0.1))
-        moteur.obstacles[-1].texture=[0.5,0.,1]
-        moteur.obstacles.append(Sphere(-1,0,-6,0.333))
-        vue=Sight(moteur)
-        vue.run()
+
+        self.moteur.obstacles.append(Cylindre(0, -3,-11,0.3,10,180,0,0))
+        self.moteur.obstacles[-1].texture=[1.,1.,1.]
+        self.moteur.obstacles.append(Cylindre(2, -3,-11,0.3,20,0,0,0))
+        self.moteur.obstacles[-1].texture=[0.8,0.2,0.1]
+        self.moteur.obstacles.append(Pave(1,0,-6,45,0,0,1, 0.333, 0.1))
+        self.moteur.obstacles[-1].texture=[0.5,0.,1]
+        self.moteur.obstacles.append(Sphere(-1,0,-6,0.333))
+        vue=Sight(self.moteur)
+        vue.start()
 
     def create_capteurs(self): # liste des capteurs et leurs valeurs
 
@@ -368,7 +375,6 @@ class Application(Frame):
                 return FALSE
 
         def get_param():
-
             #netoyage des parametres pour que n'ait pas repetition quand "cliquer" plusier fois dans le button ok
             self.checks = []
             self.param_FormPisci = []
@@ -679,11 +685,12 @@ class Application(Frame):
         lelele = button_config(win, ligneButton, press_ok,press_config_save,press_restore_default)
 
     def press_demarrage(self):
+        print("DEMARRAGE")
         self.button_dessus.config(state = NORMAL)
         self.button_camera.config(state = NORMAL)
         self.button_arret.config(state=NORMAL)
         self.press_cameraRobot()
-        self.started=True
+        self.inited=True
 
     def press_VueDessus(self):
         master = Tk()
@@ -853,7 +860,5 @@ class ligneTuyau():
         self.virgule7.grid_forget()
         self.openPare.grid_forget()
         self.closePare.grid_forget()
-
-Application()
 
 

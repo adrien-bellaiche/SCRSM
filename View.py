@@ -45,7 +45,7 @@ def boite(L,l,h,couleur=[1,0,1]):       # centrée en G
 
 class Sight(Thread):
     def __init__(self, moteurPhysique):
-        super()
+        super().__init__()
         self.moteur = moteurPhysique
         self.textures = 0
         name = "potato.txt"  # generer un nom etant "graphiclog_date_heure.txt" je crois que j'ai deja fait ça dans le simu global
@@ -104,6 +104,7 @@ class Sight(Thread):
         """ Fonction principale du view
             Contient la boucle de rafraichissement de l'affichage ainsi que la sortie du flux vidéo (à implanter)
         """
+        print("Viewer started")
         self.log("Running")
         frames = 0
         ticks = pygame.time.get_ticks()
@@ -113,6 +114,7 @@ class Sight(Thread):
         self.resize((640,480))
         self.prep()
         while self.running:
+            print("Viewer running with ", len(self.moteur.obstacles), " objects")
             self.draw()    
             pygame.display.flip()
             frames+=1
