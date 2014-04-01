@@ -1,24 +1,32 @@
 __author__ = 'Adrien'
 from math import *
 
-def mat_rot(theta, phi, psi):
-    """renvoie la matrice de rotation 3x3 correspondant a thetax + phiy + psiz"""
-    cth = cos(theta)
-    sth = sin(theta)
-    cph = cos(phi)
-    sph = sin(phi)
-    cps = cos(psi)
-    sps = sin(psi)
+def mat_rot(phi, theta, psi,R_v_TO_R_r=False):
+    """renvoie la matrice de rotation 3x3 correspondant a phi selon x + theta selon y + psi selon z"""
+    cp = cos(-phi)
+    sp = sin(-phi)
+    ct = cos(-theta)
+    st = sin(-theta)
+    cps = cos(-psi)
+    sps = sin(-psi)
     a = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-    a[0][0] = cph * cps
-    a[0][1] = -cph * sps
-    a[0][2] = sph
-    a[1][0] = sth * sph * sps + cth * sps
-    a[1][1] = -sth * sph * sps + cth * cps
-    a[1][2] = -sth * cph
-    a[2][0] = -cth * sph * cps + sth * sps
-    a[2][1] = cth * sph * sps + sth * cps
-    a[2][2] = cth * cph
+    a[0][0] = ct * cps
+    a[1][1] = sp * st * sps + cp * cps
+    a[2][2] = cp * ct
+    if R_v_TO_R_r: # passage de R_vehicule a R_fixe
+        a[0][1] = ct * sps
+        a[0][2] = -st
+        a[1][0] = sp * st * cps - cp * sps
+        a[1][2] = sp * ct
+        a[2][0] = cp * st * cps + sp * sps
+        a[2][1] = cp * st * sps - sp * cps
+    else:       # passage de R_fixe a R_vehicule
+        a[0][1] = sp * st * cps - cp * sps
+        a[0][2] = cp * st * cps + sp * sps
+        a[1][0] = ct * sps
+        a[1][2] = cp * st * sps - sp * cps
+        a[2][0] = -st
+        a[2][1] = sp * ct
     return a
 
 
@@ -141,6 +149,22 @@ def rotation(vector, a):
     v3 = a[2][0] * vector[0] + a[2][1] * vector[1] + a[2][2] * vector[2]
     return [v1, v2, v3]
 
+def produit(a,b):
+    c=[]
+    temp=0
+    if (type(b[0]).__name__!='list'):
+        for i in range(len(a)):
+            for k in range(len(b)):
+                temp+=a[i][k]*b[k]
+            c.append(temp)
+            temp=0
+        return c
+    else:
+        0() # bug provoqué
+    
+def mult(a,vect):
+    # Produit matrice * vecteur avec les parametres dans l'ordre intuitif
+    return rotation(vect,a)
 
 def intersect(a, b):
     """ Returns True if segment a intersects segment b """
@@ -158,9 +182,9 @@ def intersect(a, b):
 
 
 class ObjetPhysique():
-    def __init__(self, x, y, z, theta, phi, psi, a, b, c):
+    def __init__(self, x, y, z, phi, theta, psi, a, b, c):
         self.center = [x, y, z]
-        self.orientation = [theta, phi, psi]
+        self.orientation = [phi, theta, psi]
         self.base = [a, b, c]
         self.hitbox = [[0, 0], [0, 0], [0, 0]]
         self.update_global_box_angles()
@@ -224,6 +248,11 @@ class ObjetPhysique():
         else:
             print("Recherche de collision avec un objet non physique")
             return True
+    
+    def getPosition(self):
+        return self.center+self.orientation
+    
+    
 
 
 class Robot(ObjetPhysique):
@@ -234,7 +263,7 @@ class Robot(ObjetPhysique):
         he = 0.45  # hauteur
         super().__init__(0, 0, 0, 0, 0, 0, lo, la, he)
         self.speed = [0, 0, 0]
-        self.rotation = [0, 0, 0]
+        self.wrotation = [0, 0, 0]
 
     def presence(self, tar):
         """ renvoie la distance que le cube occupe dans la direction du centre de tar """
@@ -247,6 +276,16 @@ class Robot(ObjetPhysique):
         vec2 = rotation([0, 1, 0], self.mat)
         vec3 = rotation([0, 0, 1], self.mat)
         return self.base[0] * dot(vec, vec1) + self.base[1] * dot(vec, vec2) + self.base[2] * dot(vec, vec3)
+        
+    def getEtat(self):
+        [x,y,z,phi,theta,psi, u,v,w,p,q,r]=self.center+self.orientation+self.speed+self.wrotation
+        return [x,y,z,phi,theta,psi, u,v,w,p,q,r]
+    
+    def setEtat(self,newEtat):
+        self.center=newEtat[0:3]
+        self.orientation=newEtat[3:6]
+        self.speed=newEtat[6:9]
+        self.wrotation=newEtat[9:]
 
 
 class Sphere(ObjetPhysique):  # Fini, a tester
@@ -268,30 +307,6 @@ class Cylindre(ObjetPhysique):  # si les angles sont a 0, c'est un cylindre d'ax
         super().__init__(x, y, z, theta, phi, psi, 2 * r, 2 * r, h)
         self.rayon = r
         self.hauteur = h
-
-    #def accurate_collision(self, robot):
-    #    # Reste un cas a gerer : le cas ou le pave est un pave "long", et que le bout du pave est engage mais pas le reste. Comment gerer ce cas dans l'accurate, sachant que le "bourrin" le detecte ?
-    #    b = vect(self, robot)
-    #    u = rotation([0, 0, 1], self.mat)
-    #    l = robot.presence(self.center)
-    #    nu = norme(u)
-    #    if (norme(vectProd(b,
-    #                       u)) / nu) > self.rayon + l:  # Si la presence du robot dans la direction de l'axe + le rayon du cylindre est plus grande que la distance envoyee par
-    #        return False  # Cas dans lequel le cube ne rentre meme pas dans le "cylindre infini"
-    #    p = [self.center[0] + u[0] * self.base[2] / 2, self.center[1] + u[1] * self.base[2] / 2,
-    #         self.center[2] + u[2] * self.base[2] / 2]  # Centre d'une des deux bases
-    #    q = [self.center[0] - u[0] * self.base[2] / 2, self.center[1] - u[1] * self.base[2] / 2,
-    #         self.center[2] - u[2] * self.base[2] / 2]  # Centre de l'autre base
-    #    # petite approximation ici : au lieu de prendre la presence du robot dans la direction de son projete orthogonal, je la prend dans la direction du centre du cylindre.
-    #    # Ceci genere un deltaD qui se maximise lorsque le cube est deja "dans" le cylindre, et proche du centre du cylindre. Ce cas est cependant gere par la premiere situation
-    #    # Ce qui reduit l'erreur induite par cette approximation
-    #
-    #    w = distpointplan(robot.center, u, p) - robot.presence(self)
-    #    x = distpointplan(robot.center, u, q) - robot.presence(self)
-    #    if w > self.base[2] or x > self.base[2]:
-    #      # Si l'extremite du cube dans la direction du centre du cylindre est plus loin qu'une hauteur de n'importe lequel des deux plans de base
-    #        return False #le cube est alors dans le cylindre infini, mais pas dans le cylindre reel.
-    #    return True  # Sinon, le
 
 
 class Pave(ObjetPhysique):

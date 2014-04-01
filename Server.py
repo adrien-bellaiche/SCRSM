@@ -29,20 +29,26 @@ class ModbusServer():
     def setValue(self, adress, value):
         self.store.setValues(1, adress, [value])
 
-    def get_prop_front_left_order(self):
-        return self.get_value(2) % 256
+    def get_prop_front_left(self): # avant gauche
+        return (int(self.val_to_percent((self.get_value(2)&255))))
 
-    def get_prop_front_right_order(self):
-        return int(self.get_value(2) / 256)
+    def get_prop_front_right(self): # avant droit
+        return (int(self.val_to_percent((self.get_value(2)>>8))))
 
-    def get_prop_rear_left_order(self):
-        return self.get_value(3) % 256
+    def get_prop_rear_left(self): #arriere gauche
+        return (int(self.val_to_percent((self.get_value(3)&255))))
 
-    def get_prop_rear_right_order(self):
-        return int(self.get_value(3) / 256)
+    def get_prop_rear_right(self): #arriere droit
+        return (int(self.val_to_percent((self.get_value(3)>>8))))
 
     def get_prop_vertical(self):
-        return int(self.get_value(4) / 256)
+        return (int(self.val_to_percent((self.get_value(4)>>8))))
+
+    def percent_to_val(self,percent):
+        return percent * 1.275 + 127.5
+
+    def val_to_percent(self,val):
+        return ((200/255)*val) -100
 
     def get_lights(self):
         return int(self.get_value(5) / 256)
