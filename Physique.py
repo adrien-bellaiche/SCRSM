@@ -204,8 +204,6 @@ class ObjetPhysique():
             right = 0
             for w in range(3):
                  right += abs(self.base[w]/2 * dot(L, us[w])) + abs(target.base[w]/2 * dot(L, us[w + 3]))
-            print("along axe", k, "lhs =", left,"\nrhs = ", right)
-            print("thus there is collision along that axis : ", left<right)
             if left > right:
                  return False
         return True
@@ -242,10 +240,10 @@ class ObjetPhysique():
         """ Returns True if collides with the target. Always update the hitbox before trying it """
         if isinstance(target, ObjetPhysique):
             inter = False
-            #for k in range(3):
-            #    inter |= intersect(self.hitbox[k], target.hitbox[k])
-            #if inter:
-            return target.accurate_collision(self)
+            for k in range(3):
+                inter |= intersect(self.hitbox[k], target.hitbox[k])
+            if inter:
+                return target.accurate_collision(self)
         else:
             print("Recherche de collision avec un objet non physique")
             return True
