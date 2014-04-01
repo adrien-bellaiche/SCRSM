@@ -2,7 +2,7 @@ __author__ = 'Thibault'
 #coding: UTF-8
 from threading import Thread
 from Physique import *
-from time import sleep, time
+from time import time
 from math import *
 global precision
 precision = 1e4
