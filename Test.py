@@ -4,7 +4,7 @@ from ServerTricked import *
 from MoteurPhysique import *
 from Physique import *
 
-print("test")
+print("hello")
 
 server = ModbusServer()
 #server.setValue(2, 255 * 255)
