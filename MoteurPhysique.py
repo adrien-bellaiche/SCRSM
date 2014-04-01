@@ -57,7 +57,6 @@ class MoteurPhysique(Thread):
         self.max_depth = max_depth
         self.g = gravity
         self.rho = rho
-        #
         self.obstacles = []
         self.collision=False
         self.running = False
@@ -134,7 +133,7 @@ class MoteurPhysique(Thread):
 
     def detect_collisions(self):
         for obs in self.obstacles:
-            if obs.collideswith(self.robot):
+            if obs.collides_with(self.robot):
                 return True
         return False
         
