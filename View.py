@@ -9,7 +9,6 @@ from OpenGL.GLUT import *
 import pygame
 from pygame.locals import *
 from Physique import *
-from Simulateur import define_file
 
 
 ''' la caméra a un angle d'ouverture de 45 degrés de base mais c'est réglable '''
@@ -50,7 +49,7 @@ class Sight(Thread):
         self.moteur = moteurPhysique
         self.textures = 0
         name = "potato.txt"  # generer un nom etant "graphiclog_date_heure.txt" je crois que j'ai deja fait ça dans le simu global
-        self.logfile = os.path.join('D:\\','ENSTA','U.V.X.4','SCRSM','textures', name)
+        self.logfile =name
         self.log("New Sight: Hello")
         self.running=False
         
@@ -75,9 +74,9 @@ class Sight(Thread):
         glEnable(GL_TEXTURE_2D)
         glShadeModel(GL_SMOOTH)
         # Ici loader les differentes textures. (surfaces du robot, bords de piscine, ...)
-        self.load_textures("0.png")
-        self.load_textures("robot.png")
-        self.load_textures("piscine.png")
+        #self.load_textures("0.png")
+        #self.load_textures("robot.png")
+        #self.load_textures("piscine.png")
         
         # Turn On Fog
         glEnable(GL_FOG);

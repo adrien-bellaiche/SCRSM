@@ -2,6 +2,7 @@ from time import sleep, localtime, time
 from Server import *
 from MoteurPhysique import *
 from Application import *
+from View import Sight
 
 #from View import *
 __author__ = 'Adrien'
@@ -28,7 +29,7 @@ class Simulateur(Thread):
         self.started = False
         self.filename = define_file()
         self.init_time=time()
-        self.vision = Sight(physique)
+        self.vision = Sight(self.physique)
         while not self.window.started:
             sleep(0.05)
         self.start()
