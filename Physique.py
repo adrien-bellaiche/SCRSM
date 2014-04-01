@@ -203,7 +203,7 @@ class ObjetPhysique():
             left = abs(dot(t, L))  # si >right, alors c'est un axe separateur.
             right = 0
             for w in range(3):
-                 right += abs(self.base[w] * dot(L, us[w])) + abs(target.base[w] * dot(L, us[w + 3]))
+                 right += abs(self.base[w]/2 * dot(L, us[w])) + abs(target.base[w]/2 * dot(L, us[w + 3]))
             if left > right:
                  return False
         return True
@@ -250,9 +250,6 @@ class ObjetPhysique():
     
     def getPosition(self):
         return self.center+self.orientation
-    
-    
-
 
 class Robot(ObjetPhysique):
     def __init__(self, texID):
