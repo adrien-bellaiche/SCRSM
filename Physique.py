@@ -197,16 +197,15 @@ class ObjetPhysique():
         t = vect(self, target) # vector self->Target
         us = [rotation([1, 0, 0], self.mat), rotation([0, 1, 0], self.mat), rotation([0, 0, 1], self.mat),
               rotation([1, 0, 0], target.mat), rotation([0, 1, 0], target.mat), rotation([0, 0, 1], target.mat)]
+        # Note : voir si la version basique est encore justifiée (chrono ?)
         for k in range(6):
-            for l in range(k + 1, 6):
-                L = vectProd(us[k], us[l])
-                left = abs(dot(t, L))  # si >right, alors c'est un axe separateur.
-                right = 0
-                for w in range(3):
-                    right += abs(self.base[w] * dot(L, us[w]))
-                    right += abs(target.base[w] * dot(L, us[w + 3]))
-                if left > right:
-                    return False
+            L = us[k]
+            left = abs(dot(t, L))  # si >right, alors c'est un axe separateur.
+            right = 0
+            for w in range(3):
+                 right += abs(self.base[w] * dot(L, us[w])) + abs(target.base[w] * dot(L, us[w + 3]))
+            if left > right:
+                 return False
         return True
 
     def update_global_box_angles(self):
