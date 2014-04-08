@@ -188,7 +188,7 @@ class ObjetPhysique():
         self.base = [a, b, c]
         self.hitbox = [[0, 0], [0, 0], [0, 0]]
         self.update_global_box_angles()
-        self.mat = mat_rot(phi, theta, psi)
+        self.mat = []
         self.texture = 0  # default unspecified texture
 
     def accurate_collision(self, target):
@@ -250,6 +250,9 @@ class ObjetPhysique():
     
     def getPosition(self):
         return self.center+self.orientation
+    
+    
+
 
 class Robot(ObjetPhysique):
     def __init__(self, texID):
@@ -294,6 +297,7 @@ class Sphere(ObjetPhysique):  # Fini, a tester
         u = [rotation([1, 0, 0], robot.mat), rotation([0, 1, 0], robot.mat), rotation([0, 0, 1], robot.mat)]  # normales aux plans
         for k in range(3):
             if distpointplan(self.center, u[k], robot.center) > self.rayon + robot.base[k]:
+				# TODO : rajouter un test vis à vis des arretes.
                 return False
         return True
 

@@ -2,12 +2,12 @@ __author__ = 'Thibault'
 #coding: UTF-8
 from threading import Thread
 from Physique import *
-import time
+from time import sleep, time
 from math import *
+from ViewScipy6DThreaded import *
+from scipy.integrate import ode
 global precision
 precision = 1e4
-
-# sur z uniquement
 
 def RK3(h,X,f):    # f(t, y, parametres) donne xpoint
     global CONSTANTES
@@ -41,15 +41,16 @@ def troncature_matrice(matrice):    #checked
         for j in range(len(matrice[i])):
             matrice[i][j]=round(matrice[i][j]*precision)/precision
     return matrice
-    
 
-    
-
-
+	
 class MoteurPhysique(Thread):
     def __init__(self,robot,server, framerate, max_depth, gravity, rho):
         print(self.__class__.__name__,": __init__")
         super().__init__()
+        ''''''
+        self.Vue=Sight(self)
+        self.dt=framerate
+        ''''''
         # Récupération des paramètres
         self.robot = robot
         self.serveur = server
@@ -57,6 +58,7 @@ class MoteurPhysique(Thread):
         self.max_depth = max_depth
         self.g = gravity
         self.rho = rho
+        #
         self.obstacles = []
         self.collision=False
         self.running = False
@@ -78,12 +80,16 @@ class MoteurPhysique(Thread):
         print("\n-- CHECK UP --")
 
     def constantes(self):                   #checked
-        l= self.robot.base[0] #longueur
+        '''l= self.robot.base[0] #longueur
         e = self.robot.base[1] #epaisseur
         h = self.robot.base[2] #hauteur
-        V= l*e*h
+        V= l*e*h'''
+        l = 0.725
+        e = (0.271-0.227)
+        h = 0.5
+        V = 0.0160
         gamma = atan(0.5) #inclinaison de Rt par rapport a Rv
-        m = 5 #masse du robot
+        m = 12 #masse du robot
         Cd = 1  # Constante relou
         Ce = 0.22 # Constante relou aussi.
         I = [(m/12)*(e*e + h*h),(m/12)*(l*l + h*h),(m/12)*(e*e + l*l)] # moments d'inertie selon i j et k
@@ -107,33 +113,39 @@ class MoteurPhysique(Thread):
         #print("matrice forces avant mulp par force de prop", Mat_Ti)
         return [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi]
         
-    def run(self):      # checked mais bizarre : la framerate influence la vitesse de la simulation qui normalement est en temps réel...
+    def run(self):
         global CONSTANTES
+        ''''''
         chrono=time.time()
+        fichier=open(time.asctime()[11:13]+time.asctime()[14:16]+time.asctime()[17:19]+'.txt',"w")
+        ''''''
+        
         self.running = True
         while self.running:
             debut=time.time()
-            y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt)
+            y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
             self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
+            
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
                 break
-            #fichier.write(str(time.time()-chrono)+" "+str(self.robot.center[0])+" "+str(self.robot.center[2])+" "+str(self.propulsion()[0])+" "+str(self.propulsion()[2])+"\n")
-
-            #print(debut+self.framerate-time.time())
+            fichier.write(str(time.time()-chrono)+" "+str(self.robot.center[0])+" "+str(self.robot.center[1])+" "+str(self.robot.center[2])+" "+str(self.robot.speed[0])+" "+str(self.robot.speed[1])+" "+str(self.robot.speed[2])+" "+str(self.robot.wrotation[2])+" "+str(self.propulsion()[0])+" "+str(self.propulsion()[1])+" "+str(self.propulsion()[2])+"\n")
+            
             pauze=debut+self.framerate-time.time()
             if pauze>0:
                 time.sleep(pauze)
             else :
                 print("En retard :",pauze)
             # else : si on est en retard, on fait quoi ?
+            
+        fichier.close()
 
     def stop(self):
         self.running = False
 
     def detect_collisions(self):
         for obs in self.obstacles:
-            if obs.collides_with(self.robot):
+            if obs.collideswith(self.robot):
                 return True
         return False
         
@@ -150,32 +162,27 @@ class MoteurPhysique(Thread):
         [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi]  = parametres            # on donne un nom aux paramètres
         [x,y,z,phi,theta,psi, u,v,w,p,q,r]  = y                     # on donne un nom à chaque composante de y /!\ ON NE TOUCHE PAS A y SURTOUT !
         SUM                                 = self.propulsion()
-        l = 0.725
-        e = (0.271-0.227)
-        h = 0.5
-        V = 0.0160
         #alpha et beta, angles d inclinaison entre vecteur vitesse reel selon if et le vecteur i
-        if u == 0:
+        if abs(u) <= 1e-2:
             alpha = copysign(1, w) * pi / 2
         else:
-            alpha = atan(w / u)
+            alpha = atan2(w, u)
         if ((u*u+v*v+w*w) == 0):
             beta = 0
         else :
             beta = asin(v/(sqrt(u*u+v*v+w*w)))
-            
-        up = 0 #+(1.0/(3*m)) * (SUM[0] - (m-self.rho*V/3)*self.g*sin(theta)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*cos(alpha)+ m*(r*v-q*w))
-        vp = 0 #+(1.0/(3*m)) * (SUM[1] + (m-self.rho*V/3)*self.g*cos(theta)*sin(phi)+(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*sin(beta)+ m*(p*w-r*u))
-        wp = 0+(1.0/(3*m)) * ( SUM[2] - 0*(m-self.rho*V/3)*self.g*cos(theta)*cos(phi) -(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha))    # remonte à 0.06m/s
+        up = 0 + (1.0/(3*m)) * ( SUM[0] - 0*(m-self.rho*V/3)*self.g*sin(theta)          - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*cos(alpha)    + m*(r*v-q*w))
+        vp = 0 + (1.0/(3*m)) * ( SUM[1] + 0*(m-self.rho*V/3)*self.g*cos(theta)*sin(phi) - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*sin(beta)               + m*(p*w-r*u))
+        wp = 0 + (1.0/(3*m)) * ( SUM[2] - 0*(m-self.rho*V/3)*self.g*cos(theta)*cos(phi) - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)    + m*(q*u-p*v))    # remonte à 0.06m/s
         pp = 0 #+(1.0/(3*I[0]) * (SUM[3] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(e+h)*l*abs(p)*p+(I[1]-I[2])*q*r))
         qp = 0 #+(1.0/(3*I[1]) * (SUM[4] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+h)*e*q*q+(I[2]-I[0])*r*p))
-        rp = 0 #+(1.0/(3*I[2]) * (SUM[5] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*r*r+(I[0]-I[1])*p*q))
+        rp = 0 +(1.0/(3*I[2]) * (SUM[5] - 4*(1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*copysign(r,r)*abs(r)+(I[0]-I[1])*p*q)) # coefficients à revoir, "x4" arbitraire
         return [u,v,w,p,q,r,up,vp,wp,pp,qp,rp]
     
         '''  
         up = (1.0/(3*m)) * (SUM[0] - (m-self.rho*V)*self.g*sin(theta)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*cos(alpha)+ m*(r*v-q*w))
         vp = (1.0/(3*m)) * (SUM[1] + (m-self.rho*V)*self.g*cos(theta)*sin(phi)+(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*sin(beta)+ m*(p*w-r*u))
-        wp = (1.0/(3*m)) * (SUM[2] + (m - self.rho*V)*self.g*cos(theta)*cos(phi)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)+ m*(q*u-p*u))
+        wp = (1.0/(3*m)) * (SUM[2] + (m - self.rho*V)*self.g*cos(theta)*cos(phi)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)+ m*(q*u-p*v))
         pp = (1.0/(3*I[0]) * (SUM[3] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(e+h)*l*abs(p)*p+(I[1]-I[2])*q*r))
         qp = (1.0/(3*I[1]) * (SUM[4] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+h)*e*q*q+(I[2]-I[0])*r*p))
         rp = (1.0/(3*I[2]) * (SUM[5] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*r*r+(I[0]-I[1])*p*q))
@@ -185,8 +192,10 @@ class MoteurPhysique(Thread):
         global CONSTANTES
         [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
         # vecteur des forces des propulseurs, coefficient multiplicatif a modifier
-        Fmax=40 # force à 100%, en N
-        F_Prop = [self.serveur.get_prop_front_left()/100*Fmax,self.serveur.get_prop_front_right()/100*Fmax,self.serveur.get_prop_rear_left()/100*Fmax,self.serveur.get_prop_rear_right()/100*Fmax,self.serveur.get_prop_vertical()/100*Fmax,self.serveur.get_prop_vertical()/100*Fmax]
+        Fmaxv=40 # force des moteurs verticaux   à 100%, en N
+        Fmaxh=30 # force des moteurs horizontaux à 100%, en N
+        '''     '''
+        F_Prop = [self.serveur.get_prop_front_left()/100*Fmaxh,self.serveur.get_prop_front_right()/100*Fmaxh,self.serveur.get_prop_rear_left()/100*Fmaxh,self.serveur.get_prop_rear_right()/100*Fmaxh,self.serveur.get_prop_vertical()/100*Fmaxv,self.serveur.get_prop_vertical()/100*Fmaxv]
         #print("forces des propulseurs en N:", F_Prop)
         # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
@@ -194,7 +203,7 @@ class MoteurPhysique(Thread):
         #print("SUM =",troncature(SUM))
         return troncature(SUM)
     
-    def apply_physics(self,newEtat_Rv):    # checked
+    def apply_physics(self,newEtat_Rv):    # checked -> probleme d'angles
         [x,y,z,phi,theta,psi, u,v,w,p,q,r] = newEtat_Rv
         phi = phi%(2*pi)
         theta = theta%(2*pi)
@@ -204,16 +213,16 @@ class MoteurPhysique(Thread):
         troncature(self.robot.center)
         troncature(self.robot.speed)
         self.robot.mat=mat_rot(phi,theta,psi)
-        
-        #print("getEtatRobot('Rr')",troncature(self.getEtatRobot('Rr')))
-        #print("getEtatRobot('Rv')",troncature(self.getEtatRobot('Rv')))
         '''
+        print("getEtatRobot('Rr')[3:6]",troncature(self.getEtatRobot('Rr'))[3:6])
+        print("getEtatRobot('Rv')[3:6]",troncature(self.getEtatRobot('Rv'))[3:6])
+        
         print("POSITION :" ,self.robot.center)
         print("ORIENTATION :",self.robot.orientation)
         print("VITESSE :",self.robot.speed)
         '''
     
-    def chgtRepere(self,etat,Rr_Rv=True):   # checked
+    def chgtRepere(self,etat,Rr_Rv=True):   # checked -> problemes d'angles
         # change le repère dans lequel est exprimé le paramètre etat
         [x,y,z,phi,theta,psi, u,v,w,p,q,r] = etat
         if Rr_Rv:
