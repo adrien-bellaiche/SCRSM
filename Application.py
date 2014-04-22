@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from tkinter import *
 import math
 import os
@@ -16,10 +17,11 @@ colunne = 0
 
 class Application(Thread,Frame):
 
-    def __init__(self, moteur):
+    def __init__(self, simulation):
         super(Application, self).__init__()
-        self.moteur=moteur
-        self.robot=moteur.robot # a remplacer par simu.robot
+        self.simu = simulation
+        self.moteur = simulation.physique
+        self.robot= self.moteur.robot # a remplacer par simu.robot
         self.inited = False
         self.master = Tk()
         Frame.__init__(self, self.master)
@@ -57,20 +59,14 @@ class Application(Thread,Frame):
         self.param_FormTube_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.update()
 
-
-
     def run(self):
         self.master.mainloop()
-        print("Trying unknown rob1 & rob2")
-        self.rob1()
-        self.rob2()
         print("done")
 
     def update(self):       # mise a jour des datas
         self.dataCAP.set(str(self.robot.orientation[2]))
-        self.dataLacet.set(str(self.robot.orientation[0]))
-        self.dataRoulis.set(str(self.robot.orientation[1]))
-        self.dataTangage.set(str(self.robot.orientation[2]))
+        self.dataRoulis.set(str(self.robot.orientation[0]))
+        self.dataTangage.set(str(self.robot.orientation[1]))
         self.dataProf.set(str(self.robot.center[2]))
 
         self.master.after(200,self.update)
@@ -114,7 +110,7 @@ class Application(Thread,Frame):
         self.button_camera.grid(row = 3, column = 0, sticky = W, padx=5,pady=5)
         self.button_camera.config(state = DISABLED)
 
-        self.button_dessus = Button(self, text = "Vue du dessus ", command = self.press_VueDessus, width =20)
+        self.button_dessus = Button(self, text = "Vue du dessus ", command = NONE, width =20)
         self.button_dessus.grid(row = 3, column = 1, sticky = W, padx=5,pady=5)
         self.button_dessus.config(state = DISABLED)
 
@@ -148,10 +144,11 @@ class Application(Thread,Frame):
     def press_arret(self):
         self.button_dessus.config(state = DISABLED)
         self.button_camera.config(state = DISABLED)
+        self.simu.started=False
 
     def press_cameraRobot(self):
-
-        self.moteur.obstacles.append(Cylindre(0, -3,-11,0.3,10,180,0,0))
+        print("camera robot")
+        """self.moteur.obstacles.append(Cylindre(0, -3,-11,0.3,10,180,0,0))
         self.moteur.obstacles[-1].texture=[1.,1.,1.]
         self.moteur.obstacles.append(Cylindre(2, -3,-11,0.3,20,0,0,0))
         self.moteur.obstacles[-1].texture=[0.8,0.2,0.1]
@@ -159,20 +156,18 @@ class Application(Thread,Frame):
         self.moteur.obstacles[-1].texture=[0.5,0.,1]
         self.moteur.obstacles.append(Sphere(-1,0,-6,0.333))
         vue=Sight(self.moteur)
-        vue.start()
+        vue.start()"""
 
     def create_capteurs(self): # liste des capteurs et leurs valeurs
 
         Label(self, text ="Profondeur: ").grid(row = 1 + ligne, column = 0 + colunne, sticky = W)
         Label(self, textvariable= self.dataProf).grid(row = 1 + ligne, column = 1 + colunne, sticky = W)
-        Label(self, text ="Cap: ").grid(row = 2 + ligne, column = 0 + colunne, sticky = W)
-        Label(self, textvariable = self.dataCAP).grid(row = 2 + ligne, column = 1 + colunne, sticky = W)
-        Label(self, text ="Lacet: ").grid(row = 3 + ligne, column = 0 + colunne, sticky = W)
-        Label(self, textvariable = self.dataLacet).grid(row = 3 + ligne, column = 1 + colunne, sticky = W)
-        Label(self, text ="Roulis: ").grid(row = 4 + ligne, column = 0 + colunne, sticky = W)
-        Label(self, textvariable =self.dataRoulis).grid(row = 4 + ligne, column = 1 + colunne, sticky = W)
-        Label(self, text ="Tangage: ").grid(row = 5 + ligne, column = 0 + colunne, sticky = W)
-        Label(self, textvariable = self.dataTangage).grid(row = 5 + ligne, column = 1 + colunne, sticky = W)
+        Label(self, text ="Roulis: ").grid(row = 2 + ligne, column = 0 + colunne, sticky = W)
+        Label(self, textvariable =self.dataRoulis).grid(row = 2 + ligne, column = 1 + colunne, sticky = W)
+        Label(self, text ="Tangage: ").grid(row = 3 + ligne, column = 0 + colunne, sticky = W)
+        Label(self, textvariable = self.dataTangage).grid(row = 3 + ligne, column = 1 + colunne, sticky = W)
+        Label(self, text ="Cap: ").grid(row = 4 + ligne, column = 0 + colunne, sticky = W)
+        Label(self, textvariable = self.dataCAP).grid(row = 4 + ligne, column = 1 + colunne, sticky = W)
 
     def winConfig(self):
 
@@ -692,7 +687,7 @@ class Application(Thread,Frame):
         self.press_cameraRobot()
         self.inited=True
 
-    def press_VueDessus(self):
+    """def press_VueDessus(self):
         master = Tk()
         w = Canvas(master, width=self.param_FormPisci[0]+10,height=self.param_FormPisci[1]+10)
         w.pack()
@@ -781,7 +776,7 @@ class Application(Thread,Frame):
             w.delete(self.rob2)
             rob(self.robot.center[0],self.robot.center[1],self.robot.center[2], self.robot.orientation[0],self.param_FormPisci)
             w.after(200)
-            w.update()
+            w.update()"""
 
 class button_config():
 
