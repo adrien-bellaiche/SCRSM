@@ -4,7 +4,6 @@ from threading import Thread
 from Physique import *
 from time import sleep, time
 from math import *
-from ViewScipy6DThreaded import *
 from scipy.integrate import ode
 global precision
 precision = 1e4
@@ -15,7 +14,8 @@ def RK3(h,X,f):    # f(t, y, parametres) donne xpoint
     k2 = f(h/3  , CL(1,X,h/3,k1)    , CONSTANTES)
     k3 = f(2*h/3, CL(1,X,2*h/3,k2)  , CONSTANTES)
     new_X = CL(1,X,h/4,CL(1,k1,3,k3))
-    return new_X
+    anciens_angles = X[3:6]
+    return [new_X,anciens_angles]
     
 def CL(alpha,l1,beta,l2):
     y=[]
@@ -25,15 +25,17 @@ def CL(alpha,l1,beta,l2):
     
 def troncature(liste):              #checked
     global precision
+    a=list(liste)
     for i in range(len(liste)):
-        liste[i]=int(liste[i]*precision)/float(precision)
-    return liste
+        a[i]=int(liste[i]*precision)/float(precision)
+    return a
 
 def troncature_angle(liste):        #checked
     global precision
+    a=list(liste)
     for i in range(len(liste)):
-        liste[i]=int(liste[i]*precision)/precision
-    return liste
+        a[i]=int(liste[i]*precision)/precision
+    return a
     
 def troncature_matrice(matrice):    #checked
     global precision
@@ -47,10 +49,6 @@ class MoteurPhysique(Thread):
     def __init__(self,robot,server, framerate, max_depth, gravity, rho):
         print(self.__class__.__name__,": __init__")
         super().__init__()
-        ''''''
-        self.Vue=Sight(self)
-        self.dt=framerate
-        ''''''
         # Récupération des paramètres
         self.robot = robot
         self.serveur = server
@@ -80,10 +78,6 @@ class MoteurPhysique(Thread):
         print("\n-- CHECK UP --")
 
     def constantes(self):                   #checked
-        '''l= self.robot.base[0] #longueur
-        e = self.robot.base[1] #epaisseur
-        h = self.robot.base[2] #hauteur
-        V= l*e*h'''
         l = 0.725
         e = (0.271-0.227)
         h = 0.5
@@ -115,10 +109,8 @@ class MoteurPhysique(Thread):
         
     def run(self):
         global CONSTANTES
-        ''''''
+        
         chrono=time.time()
-        fichier=open(time.asctime()[11:13]+time.asctime()[14:16]+time.asctime()[17:19]+'.txt',"w")
-        ''''''
         
         self.running = True
         while self.running:
@@ -129,7 +121,6 @@ class MoteurPhysique(Thread):
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
                 break
-            fichier.write(str(time.time()-chrono)+" "+str(self.robot.center[0])+" "+str(self.robot.center[1])+" "+str(self.robot.center[2])+" "+str(self.robot.speed[0])+" "+str(self.robot.speed[1])+" "+str(self.robot.speed[2])+" "+str(self.robot.wrotation[2])+" "+str(self.propulsion()[0])+" "+str(self.propulsion()[1])+" "+str(self.propulsion()[2])+"\n")
             
             pauze=debut+self.framerate-time.time()
             if pauze>0:
@@ -137,8 +128,7 @@ class MoteurPhysique(Thread):
             else :
                 print("En retard :",pauze)
             # else : si on est en retard, on fait quoi ?
-            
-        fichier.close()
+        
 
     def stop(self):
         self.running = False
@@ -179,15 +169,6 @@ class MoteurPhysique(Thread):
         rp = 0 +(1.0/(3*I[2]) * (SUM[5] - 4*(1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*copysign(r,r)*abs(r)+(I[0]-I[1])*p*q)) # coefficients à revoir, "x4" arbitraire
         return [u,v,w,p,q,r,up,vp,wp,pp,qp,rp]
     
-        '''  
-        up = (1.0/(3*m)) * (SUM[0] - (m-self.rho*V)*self.g*sin(theta)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*cos(alpha)+ m*(r*v-q*w))
-        vp = (1.0/(3*m)) * (SUM[1] + (m-self.rho*V)*self.g*cos(theta)*sin(phi)+(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*sin(beta)+ m*(p*w-r*u))
-        wp = (1.0/(3*m)) * (SUM[2] + (m - self.rho*V)*self.g*cos(theta)*cos(phi)-(1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)+ m*(q*u-p*v))
-        pp = (1.0/(3*I[0]) * (SUM[3] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(e+h)*l*abs(p)*p+(I[1]-I[2])*q*r))
-        qp = (1.0/(3*I[1]) * (SUM[4] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+h)*e*q*q+(I[2]-I[0])*r*p))
-        rp = (1.0/(3*I[2]) * (SUM[5] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*r*r+(I[0]-I[1])*p*q))
-        return[u,v,w,p,q,r,up,vp,wp,pp,qp,rp]'''
-    
     def propulsion(self): # OK
         global CONSTANTES
         [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
@@ -196,42 +177,35 @@ class MoteurPhysique(Thread):
         Fmaxh=30 # force des moteurs horizontaux à 100%, en N
         '''     '''
         F_Prop = [self.serveur.get_prop_front_left()/100*Fmaxh,self.serveur.get_prop_front_right()/100*Fmaxh,self.serveur.get_prop_rear_left()/100*Fmaxh,self.serveur.get_prop_rear_right()/100*Fmaxh,self.serveur.get_prop_vertical()/100*Fmaxv,self.serveur.get_prop_vertical()/100*Fmaxv]
-        #print("forces des propulseurs en N:", F_Prop)
         # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
         SUM+=produit(Mat_MTi,F_Prop)
-        #print("SUM =",troncature(SUM))
         return troncature(SUM)
     
-    def apply_physics(self,newEtat_Rv):    # checked -> probleme d'angles
-        [x,y,z,phi,theta,psi, u,v,w,p,q,r] = newEtat_Rv
-        phi = phi%(2*pi)
-        theta = theta%(2*pi)
-        psi = psi%(2*pi)
-        
-        self.robot.setEtat(self.chgtRepere([x,y,z,phi,theta,psi, u,v,w,p,q,r],Rr_Rv=False))
-        troncature(self.robot.center)
-        troncature(self.robot.speed)
+    def apply_physics(self,newEtat_Rv):    # checked
+        newEtat_Rv[0][3] %= (2*pi)
+        newEtat_Rv[0][4] %= (2*pi)
+        newEtat_Rv[0][5] %= (2*pi)
+        newEtat_Rr=self.chgtRepere(newEtat_Rv,Rr_Rv=False)
+        self.robot.setEtat(newEtat_Rr)
+        self.robot.center = troncature(self.robot.center)
+        self.robot.speed  = troncature(self.robot.speed)
+        [phi,theta,psi]=newEtat_Rv[0][3:6]
         self.robot.mat=mat_rot(phi,theta,psi)
-        '''
-        print("getEtatRobot('Rr')[3:6]",troncature(self.getEtatRobot('Rr'))[3:6])
-        print("getEtatRobot('Rv')[3:6]",troncature(self.getEtatRobot('Rv'))[3:6])
-        
-        print("POSITION :" ,self.robot.center)
-        print("ORIENTATION :",self.robot.orientation)
-        print("VITESSE :",self.robot.speed)
-        '''
     
-    def chgtRepere(self,etat,Rr_Rv=True):   # checked -> problemes d'angles
+    def chgtRepere(self,etat,Rr_Rv=True):   # checked
         # change le repère dans lequel est exprimé le paramètre etat
-        [x,y,z,phi,theta,psi, u,v,w,p,q,r] = etat
         if Rr_Rv:
+            [x,y,z,phi,theta,psi, u,v,w,p,q,r] = etat
             Pr_v = mat_rot(phi, theta, psi) # Matrice de passage de Rr vers Rv
             [x,y,z]         = rotation([x,y,z], Pr_v)   # passage des positions de Rr vers Rv
             [u,v,w]         = rotation([u,v,w], Pr_v)   # passage des vitesses de Rr vers Rv
             [p,q,r]         = rotation([p,q,r], Pr_v)   # passage des vitesses de rotation de Rr vers Rv
         else:
-            Pv_r = mat_rot(phi, theta, psi,R_v_TO_R_r=True) # Matrice de passage de Rv vers Rr
+            [x,y,z,phi,theta,psi, u,v,w,p,q,r] = etat[0]
+            anciens_angles=etat[1]
+            [phi_,theta_,psi_]=anciens_angles
+            Pv_r = mat_rot(phi_, theta_, psi_,R_v_TO_R_r=True) # Matrice de passage de Rv vers Rr
             [x,y,z]         = rotation([x,y,z], Pv_r)
             [u,v,w]         = rotation([u,v,w], Pv_r)
             [p,q,r]         = rotation([p,q,r], Pv_r)
