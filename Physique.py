@@ -160,7 +160,7 @@ def produit(a,b):
             temp=0
         return c
     else:
-        0() # bug provoqué
+        0() # bug provoque
     
 def mult(a,vect):
     # Produit matrice * vecteur avec les parametres dans l'ordre intuitif
@@ -197,7 +197,7 @@ class ObjetPhysique():
         t = vect(self, target) # vector self->Target
         us = [rotation([1, 0, 0], self.mat), rotation([0, 1, 0], self.mat), rotation([0, 0, 1], self.mat),
               rotation([1, 0, 0], target.mat), rotation([0, 1, 0], target.mat), rotation([0, 0, 1], target.mat)]
-        # Note : voir si la version basique est encore justifiée (chrono ?)
+        # Note : voir si la version basique est encore justifiee (chrono ?)
         for k in range(6):
             L = us[k]
             left = abs(dot(t, L))  # si >right, alors c'est un axe separateur.

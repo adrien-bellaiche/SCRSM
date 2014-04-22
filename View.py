@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Adrien'
 
 import time
@@ -11,7 +12,7 @@ from pygame.locals import *
 from Physique import *
 
 
-''' la caméra a un angle d'ouverture de 45 degrés de base mais c'est réglable '''
+''' la camera a un angle d'ouverture de 45 degrés de base mais c'est réglable '''
 
 def date():
     # renvoie un str sous ce format : "[DDMmmYY-HHMMSS] "
