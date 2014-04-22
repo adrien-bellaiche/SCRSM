@@ -110,11 +110,11 @@ class MoteurPhysique(Thread):
     def run(self):
         global CONSTANTES
         
-        chrono=time.time()
+        chrono=time()
         
         self.running = True
         while self.running:
-            debut=time.time()
+            debut=time()
             y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
             self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
             
@@ -122,9 +122,9 @@ class MoteurPhysique(Thread):
                 self.collision=True
                 break
             
-            pauze=debut+self.framerate-time.time()
+            pauze=debut+self.framerate-time()
             if pauze>0:
-                time.sleep(pauze)
+                sleep(pauze)
             else :
                 print("En retard :",pauze)
             # else : si on est en retard, on fait quoi ?
