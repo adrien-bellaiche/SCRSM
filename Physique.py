@@ -297,12 +297,14 @@ class Sphere(ObjetPhysique):  # Fini, a tester
         self.rayon = r
 
     def accurate_collision(self, robot):
-        # Distance a chaque plan genere par les faces "repositionne" au centre du robot. Si au moins une est superieure a self.rayon + base[i]/2 alors, pas de collision. Sinon, collision.
-        u = [rotation([1, 0, 0], robot.mat), rotation([0, 1, 0], robot.mat), rotation([0, 0, 1], robot.mat)]  # normales aux plans
-        for k in range(3):
-            if distpointplan(self.center, u[k], robot.center) > self.rayon + robot.base[k]:
-				# TODO : rajouter un test vis à vis des arretes.
-                return False
+        t = vect(self, robot) # vector self->Target
+        us = [rotation([1, 0, 0], robot.mat), rotation([0, 1, 0], robot.mat), rotation([0, 0, 1], robot.mat)]
+        # Note : voir si la version basique est encore justifiee (chrono ?)
+        contrib_robot = 0
+        for w in range(3):
+            contrib_robot += robot.base[w]/2 * dot(t, us[w])
+        if(distance(self, robot) > contrib_robot + self.rayon):
+            return False
         return True
 
 
