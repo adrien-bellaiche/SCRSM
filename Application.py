@@ -18,7 +18,7 @@ class Application(Thread,Frame):
         self.inited = False
         self.master = Tk()
         Frame.__init__(self, self.master)
-        self.master.title("Simulateur")
+        self.master.title("Simulateur - SCRSM")
         self.grid()
         self.config_default=[]
         self.config_saved=[]
@@ -107,7 +107,7 @@ class Application(Thread,Frame):
 
         self.bool_camera = v
 
-        self.button_demarrage = Button(self, text = "Démarrage Simulateur", command = self.press_demarrage)
+        self.button_demarrage = Button(self, text = "Démarrage Simulateur", command = self.press_demarrage,width=35)
         self.button_demarrage.grid(row = 3, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
         self.button_demarrage.config(state = DISABLED)
 
@@ -579,7 +579,7 @@ class Application(Thread,Frame):
         win.colorBall_23.grid(row=ligneBallJau, columnspan = 3,column = 16+colunne_config, sticky = W)
 
         # Entree position du tuyau jaune
-        cb_ptj = Checkbutton(win, text ="   Tuyau (x,y,z,l,r,phi,psi): ",command = checkPTJ)
+        cb_ptj = Checkbutton(win, text ="   Tuyau (x,y,z,r,l,theta,phi,psi): ",command = checkPTJ)
         cb_ptj.grid(row = ligneTuyPos, column = 0, columnspan = 3, sticky = W)
         Label(win, text ="(").grid(row = ligneTuyPos, column = 1+colunne_config, sticky = W)
         win.posTuyX = Entry(win, width=boxTaille)
@@ -634,6 +634,8 @@ class Application(Thread,Frame):
             win.formTuyauL.delete(0,END)
             win.formTuyauR.delete(0,END)
             win.formTuyauTheta.delete(0,END)
+            win.formTuyauPhi.delete(0,END)
+            win.formTuyauPsi.delete(0,END)
 
             # transformation des element à int
             self.defa_checks = [int(i) for i in self.defa_checks]
