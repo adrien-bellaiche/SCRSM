@@ -6,7 +6,7 @@ from View import *
 
 ligne = 4
 colunne = 0
-
+global v
 
 class Application(Thread,Frame):
 
@@ -88,7 +88,7 @@ class Application(Thread,Frame):
         menubar.add_cascade(label="Help", menu=viewMenu)
 
     def create_widget(self): # config button - start button - camera button - Up View button
-
+        global v
         self.master.protocol('WM_DELETE_WINDOW', self.onExit)
 
         w_button_cameras = 20
@@ -96,16 +96,10 @@ class Application(Thread,Frame):
         self.button_config = Button(self, text = "Configuration", command = self.winConfig,height=3)
         self.button_config.grid(row = 0, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
 
-        v = IntVar()
+        v=IntVar()
+        Radiobutton(self, text="Vue caméra", variable=v, value=1).grid(row=1, column = 0, sticky = W)
+        Radiobutton(self, text="Vue du dessus", variable=v, value=0).grid(row=2, column = 0, sticky = W)
 
-        self.rbutton_cameraTrue = Radiobutton(self, text="Vue caméra", variable=v, value=1)
-        self.rbutton_cameraTrue.grid(row=1, column = 0, sticky = W)
-        self.rbutton_cameraTrue.config(state = DISABLED)
-        self.rbutton_cameraFalse = Radiobutton(self, text="Vue du dessus", variable=v, value=0)
-        self.rbutton_cameraFalse.grid(row=2, column = 0, sticky = W)
-        self.rbutton_cameraFalse.config(state = DISABLED)
-
-        self.bool_camera = v
 
         self.button_demarrage = Button(self, text = "Démarrer Simulateur", command = self.press_demarrage,width=35)
         self.button_demarrage.grid(row = 3, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
@@ -153,12 +147,6 @@ class Application(Thread,Frame):
         self.simu.started=False
         self.button_arret.config(state=DISABLED)
 
-
-    def press_cameraRobot(self):
-        print("camera robot")
-        vue=Sight(self.moteur,self.bool_camera)
-        print(vue.moteur.obstacles)
-        vue.start()
 
     def create_capteurs(self): # liste des capteurs et leurs valeurs
 
@@ -223,27 +211,33 @@ class Application(Thread,Frame):
             saved_file.close()
 
         def set_params_in_physique():
-
+            self.moteur.obstacles.append(Pave(0,0,0,0,0,0, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
             if self.checks[0] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
+                if self.param_balleRou[4] == 1: # rouge
+                    self.moteur.obstacles[-1].texture=[1,0,0]
+                elif self.param_balleRou[4] == 2:
+                    self.moteur.obstacles[-1].texture=[1,1,0]
+                else:
+                    self.moteur.obstacles[-1].texture=[0,1,0]
             if self.checks[1] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleJau[0:4]))
+                if self.param_balleJau[4] == 1: # rouge
+                    self.moteur.obstacles[-1].texture=[1,0,0]
+                elif self.param_balleJau[4] == 2:
+                    self.moteur.obstacles[-1].texture=[1,1,0]
+                else:
+                    self.moteur.obstacles[-1].texture=[0,1,0]
             if self.checks[2] == 1:
                 self.moteur.obstacles.append(Cylindre(self.param_FormTube[0:8]))
             if not not self.param_tubes:
                 for i in range(0,len(self.param_tubes)-8,8):
                     self.moteur.obstacles.append(Cylindre(self.param_tubes[i:i+8]))
 
-            #liste obss
-            #for
-            # sphere : obss.append(Sphere(sdsdfsdfsd))
-            # pave : asdfg
 
         def press_ok():
             get_param()
             set_params_in_physique()
-            self.rbutton_cameraFalse.config(state = NORMAL)
-            self.rbutton_cameraTrue.config(state = NORMAL)
             self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
             press_config_save()                             # sauveguarde des parametres
             win.destroy()                                   # ferme la fenetre config
@@ -707,10 +701,18 @@ class Application(Thread,Frame):
         lelele = button_config(win, ligneButton, press_ok,press_config_save,press_restore_default)
 
     def press_demarrage(self):
+        print(self.moteur.obstacles)
         print("DEMARRAGE")
         self.button_arret.config(state=NORMAL)
-        self.press_cameraRobot()
+        vue=Sight(self.moteur,v.get())
+        print(vue.moteur.robot.orientation)
+        vue.start()
+        self.robot.center[0]=-2
         self.inited=True
+        while True:
+            sleep(0.1)
+            self.robot.orientation[1]-=0.05
+
 
 class button_config():
 

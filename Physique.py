@@ -188,7 +188,7 @@ class ObjetPhysique():
         self.base = [a, b, c]
         self.hitbox = [[0, 0], [0, 0], [0, 0]]
         self.update_global_box_angles()
-        self.mat = []
+        self.mat = mat_rot(phi,theta,psi)
         self.texture = 0  # default unspecified texture
 
     def accurate_collision(self, target):
