@@ -93,39 +93,50 @@ class Application(Thread,Frame):
 
         w_button_cameras = 20
 
-        self.button_config = Button(self, text = "Configuration", command = self.winConfig)
+        self.button_config = Button(self, text = "Configuration", command = self.winConfig,height=3)
         self.button_config.grid(row = 0, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
 
         v = IntVar()
 
-        self.rbutton_cameraTrue = Radiobutton(self, text="True", variable=v, value=1)
+        self.rbutton_cameraTrue = Radiobutton(self, text="Vue caméra", variable=v, value=1)
         self.rbutton_cameraTrue.grid(row=1, column = 0, sticky = W)
         self.rbutton_cameraTrue.config(state = DISABLED)
-        self.rbutton_cameraFalse = Radiobutton(self, text="False", variable=v, value=0)
+        self.rbutton_cameraFalse = Radiobutton(self, text="Vue du dessus", variable=v, value=0)
         self.rbutton_cameraFalse.grid(row=2, column = 0, sticky = W)
         self.rbutton_cameraFalse.config(state = DISABLED)
 
         self.bool_camera = v
 
-        self.button_demarrage = Button(self, text = "Démarrage Simulateur", command = self.press_demarrage,width=35)
+        self.button_demarrage = Button(self, text = "Démarrer Simulateur", command = self.press_demarrage,width=35)
         self.button_demarrage.grid(row = 3, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
         self.button_demarrage.config(state = DISABLED)
 
-        self.button_arret = Button(self, text = "Arrêt", command = self.press_arret)
+        self.button_arret = Button(self, text = "Arreter Simulateur", command = self.press_arret)
         self.button_arret.grid(row = 4, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
         self.button_arret.config(state = DISABLED)
 
     def onExitYes(self):
         self.master.destroy()
 
-    def onExit(self):      # fenetre pour verifier la fermeture du simulateur
 
+
+    def onExit(self):      # fenetre pour verifier la fermeture du simulateur
+        def centrefenetre(fen):
+            def geoliste(g):
+                r=[i for i in range(0,len(g)) if not g[i].isdigit()]
+                return [int(g[0:r[0]]),int(g[r[0]+1:r[1]]),int(g[r[1]+1:r[2]]),int(g[r[2]+1:])]
+            fen.update_idletasks()
+            l,h,x,y=geoliste(fen.geometry())
+            fen.geometry("%dx%d%+d%+d" % (200,120,(fen.winfo_screenwidth()-l)//2,(fen.winfo_screenheight()-h)//2))
+
+        j=self.winfo_width()
+        print(j)
         top = Toplevel()
         top.title("Exit")
         top.focus_set()
-
-        msg = Message(top, text="Do you want to exit Simulateur?")
-        msg.pack(side=TOP)
+        centrefenetre(top)
+        msg = Message(top, text="Etes-vous sûr de vouloir quitter \nSimulateur - SCRSM?")
+        msg.pack()
 
         buttonYes = Button(top, text="Yes", width = 10, command=self.onExitYes)
         buttonYes.pack(side=LEFT, padx = 10,pady = 10)
@@ -139,8 +150,6 @@ class Application(Thread,Frame):
         os.startfile(os.path.realpath('help.txt'))
 
     def press_arret(self):
-        self.button_dessus.config(state = DISABLED)
-        self.button_camera.config(state = DISABLED)
         self.simu.started=False
         self.button_arret.config(state=DISABLED)
 
@@ -706,12 +715,12 @@ class Application(Thread,Frame):
 class button_config():
 
     def __init__(self, win, ligneButton, press_ok, press_config_save,press_restore_default):
-        win.config_button_ok = Button(win, text = "Ok", command = press_ok,width=8)
+        win.config_button_ok = Button(win, text = "Ok", command = press_ok,width=12)
         win.config_button_ok.grid(row=ligneButton, column = 1,padx=5,pady=5)
         win.config_button_save_default = Button(win, text = "Save as default", command=press_config_save, width=12)
         win.config_button_save_default.grid(row=ligneButton, column = 2,padx=5,pady=5)
-        win.config_button_cancel = Button(win, text = "Cancel", command=win.destroy, width=8)
-        win.config_button_cancel.grid(row=ligneButton, column = 10, columnspan = 5,padx=5,pady=5)
+        win.config_button_cancel = Button(win, text = "Cancel", command=win.destroy, width=12)
+        win.config_button_cancel.grid(row=ligneButton, column = 9, columnspan = 5,padx=5,pady=5)
         win.config_button_restore = Button(win, text = "Restore Default", command=press_restore_default, width=12)
         win.config_button_restore.grid(row=ligneButton, column = 4, columnspan = 5,padx=5,pady=5)
 
