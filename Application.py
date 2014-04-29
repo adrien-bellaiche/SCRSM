@@ -51,6 +51,7 @@ class Application(Thread,Frame):
         self.param_balleJau_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.param_FormTube_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.update()
+        self.bool_camera = IntVar()
 
     def run(self):
         self.master.mainloop()
@@ -95,17 +96,20 @@ class Application(Thread,Frame):
         self.button_config = Button(self, text = "Configuration", command = self.winConfig)
         self.button_config.grid(row = 0, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
 
+        v = IntVar()
+
+        self.rbutton_cameraTrue = Radiobutton(self, text="True", variable=v, value=1)
+        self.rbutton_cameraTrue.grid(row=1, column = 0, sticky = W)
+        self.rbutton_cameraTrue.config(state = DISABLED)
+        self.rbutton_cameraFalse = Radiobutton(self, text="False", variable=v, value=0)
+        self.rbutton_cameraFalse.grid(row=2, column = 0, sticky = W)
+        self.rbutton_cameraFalse.config(state = DISABLED)
+
+        self.bool_camera = v
+
         self.button_demarrage = Button(self, text = "Démarrage Simulateur", command = self.press_demarrage)
-        self.button_demarrage.grid(row = 1, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
+        self.button_demarrage.grid(row = 3, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
         self.button_demarrage.config(state = DISABLED)
-
-        self.button_camera = Button(self, text = "Caméra du robot", command = self.press_cameraRobot, width = w_button_cameras)
-        self.button_camera.grid(row = 3, column = 0, sticky = W, padx=5,pady=5)
-        self.button_camera.config(state = DISABLED)
-
-        self.button_dessus = Button(self, text = "Vue du dessus ", command = NONE, width =20)
-        self.button_dessus.grid(row = 3, column = 1, sticky = W, padx=5,pady=5)
-        self.button_dessus.config(state = DISABLED)
 
         self.button_arret = Button(self, text = "Arrêt", command = self.press_arret)
         self.button_arret.grid(row = 4, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
@@ -143,7 +147,8 @@ class Application(Thread,Frame):
 
     def press_cameraRobot(self):
         print("camera robot")
-        vue=Sight(self.moteur,True)
+        vue=Sight(self.moteur,self.bool_camera)
+        print(vue.moteur.obstacles)
         vue.start()
 
     def create_capteurs(self): # liste des capteurs et leurs valeurs
@@ -209,19 +214,17 @@ class Application(Thread,Frame):
             saved_file.close()
 
         def set_params_in_physique():
-            print("test")
-            print(self.checks)
-            print(self.param_FormPisci)
-            print(self.param_balleRou[0],self.param_balleRou[1],self.param_balleRou[2],self.param_balleRou[3])
-            print(self.param_balleJau)
-            print(self.param_FormTube)
-            print(self.param_tubes)
-            if self.checks[1] == 1:
+
+            if self.checks[0] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
-            if self.checks[2] == 1:
+            if self.checks[1] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleJau[0:4]))
-            if self.checks[3] == 1:
-                
+            if self.checks[2] == 1:
+                self.moteur.obstacles.append(Cylindre(self.param_FormTube[0:8]))
+            if not not self.param_tubes:
+                for i in range(0,len(self.param_tubes)-8,8):
+                    self.moteur.obstacles.append(Cylindre(self.param_tubes[i:i+8]))
+
             #liste obss
             #for
             # sphere : obss.append(Sphere(sdsdfsdfsd))
@@ -230,16 +233,8 @@ class Application(Thread,Frame):
         def press_ok():
             get_param()
             set_params_in_physique()
-            """            # prendre les parametres inserés pour l'utilisateur
-            if not self.isOk:       # si les parametres inserés sont bons continue si non message d'erreur
-               top = Toplevel()
-               top.title("Error")
-               msg = Message(top, text="Parameter Error")
-               msg.pack()
-
-               button = Button(top, text="Ok", command=top.destroy)
-               button.pack()
-            else:"""
+            self.rbutton_cameraFalse.config(state = NORMAL)
+            self.rbutton_cameraTrue.config(state = NORMAL)
             self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
             press_config_save()                             # sauveguarde des parametres
             win.destroy()                                   # ferme la fenetre config
@@ -447,15 +442,16 @@ class Application(Thread,Frame):
             # concaténation des parametres des tuyaus tenant compte le nombre de tuyau
             if (self.numTuyau>0):
                 for i in range(len(self.tuyau)):
-                    self.param_FormTube.append(self.tuyau[i].posTuyX.get())
-                    self.param_FormTube.append(self.tuyau[i].posTuyY.get())
-                    self.param_FormTube.append(self.tuyau[i].posTuyZ.get())
-                    self.param_FormTube.append(self.tuyau[i].formTuyauL.get())
-                    self.param_FormTube.append(self.tuyau[i].formTuyauR.get())
-                    self.param_FormTube.append(self.tuyau[i].formTuyauTheta.get())
-                    self.param_FormTube.append(self.tuyau[i].formTuyauPhi.get())
-                    self.param_FormTube.append(self.tuyau[i].formTuyauPsi.get())
+                    self.param_tubes.append(self.tuyau[i].posTuyX.get())
+                    self.param_tubes.append(self.tuyau[i].posTuyY.get())
+                    self.param_tubes.append(self.tuyau[i].posTuyZ.get())
+                    self.param_tubes.append(self.tuyau[i].formTuyauL.get())
+                    self.param_tubes.append(self.tuyau[i].formTuyauR.get())
+                    self.param_tubes.append(self.tuyau[i].formTuyauTheta.get())
+                    self.param_tubes.append(self.tuyau[i].formTuyauPhi.get())
+                    self.param_tubes.append(self.tuyau[i].formTuyauPsi.get())
             self.param_FormTube = [float(i) for i in self.param_FormTube]
+            self.param_tubes = [float(i) for i in self.param_tubes]
             self.isOk = self.isOk*tuyauIsOk(self.param_FormTube[0],self.param_FormTube[1],self.param_FormTube[2],self.param_FormTube[3],self.param_FormTube[4],self.param_FormPisci)
 
 
@@ -701,102 +697,9 @@ class Application(Thread,Frame):
 
     def press_demarrage(self):
         print("DEMARRAGE")
-        self.button_dessus.config(state = NORMAL)
-        self.button_camera.config(state = NORMAL)
         self.button_arret.config(state=NORMAL)
         self.press_cameraRobot()
         self.inited=True
-
-    """def press_VueDessus(self):
-        master = Tk()
-        w = Canvas(master, width=self.param_FormPisci[0]+10,height=self.param_FormPisci[1]+10)
-        w.pack()
-        master.title("Vue du Dessus")
-        master.focus_set()
-        r= 50
-
-        def piscine(x,y,z):
-
-            w.create_rectangle(10, 10, x,y, fill ='#b2f4ff', width=5)
-
-
-        #creation du robot (coin haut gauche, coin haut droit, angle du robot, profondeur)
-        def rob(x,y,z,theta,pisci):
-
-            rad = theta
-            if (z != 0):
-                r2 = r/z
-            else :
-                r2 = r
-
-            x = pisci[0]/2 -r2 +x
-            y = pisci[1]/2-r2 +y
-
-            self.rob1 = w.create_oval(x, y, x + 2*r2, y + 2*r2, fill="yellow", tag = 'robot')
-            c= [x + r2, y + r2]
-            self.rob2 = w.create_line(c[0], c[1], c[0] + r2 * math.cos(3*pi), c[1] - r2 * math.sin(pi*3), fill="black", width=2, tag='robdirec')
-
-        #creation d'une balle (coin haut gauche, coin haut droit, couleur, rayon, profondeur )
-        def balle(x,y,z,r1,couleur, pisci):
-            global col
-            if int(couleur) == 1:
-                col = "red"
-            elif int(couleur)==2:
-                col = "yellow"
-            elif int(couleur)==3:
-                col = "green"
-
-            if (z != 0):
-                r2 = r1 /z
-            else :
-                r2 = r1
-            x = pisci[0]/2 -r2 +x
-            y = pisci[1]/2 -r2 -y
-            w.create_oval(x, y, x+ 2*r2,y+ 2*r2, fill=col)
-
-
-        def tube(x,y,L1,e,pisci):
-            x = pisci[0]/2 + x
-            y = pisci[1]/2 - y
-            x = x -L1
-            y = y - L1/2
-
-            p1 = [x, y]
-            p2 = [x + L1,y]
-            p3 = [x+L1, y+L1]
-            p4 = [x+L1 + L1, y+L1]
-            w.create_line(p1[0], p1[1], p2[0], p2[1], fill="yellow", width=e)
-            w.create_line(p2[0], p2[1], p3[0], p3[1], fill="yellow", width=e)
-            w.create_line(p3[0], p3[1], p4[0], p4[1], fill="yellow", width=e)
-
-        # piscine (x,y)
-        piscine (self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2])
-
-        #balleRouge(coin haut gauche, coin haut droit, profondeur, rayon, couleur = 0)
-        if self.param_balleRou_Actif:
-            balle(self.param_balleRou[0],self.param_balleRou[1],self.param_balleRou[2], self.param_balleRou[3],self.ball_color1.get(),self.param_FormPisci)
-
-
-        #balleJaune(coin haut gauche, coin haut droit, profondeur, rayon, couleur = 0)
-        if self.param_balleJau_Actif:
-            balle(self.param_balleJau[0],self.param_balleJau[1],self.param_balleJau[2], self.param_balleJau[3],int(self.ball_color2.get()),self.param_FormPisci)
-
-        #tube(L,e,x,y)
-        if self.param_FormTube_Actif:
-            tube(self.param_FormTube[0],self.param_FormTube[1],self.param_FormTube[3],self.param_FormTube[4],self.param_FormPisci)
-        for i in range(self.numTuyau):
-            if self.param_FormTube_Actif:
-                tube(self.param_FormTube[i*8+8],self.param_FormTube[i*8+9],self.param_FormTube[i*8+11],self.param_FormTube[i*8+12],self.param_FormPisci)
-        #rob(x,y,z,theta)
-        rob(self.robot.center[0],self.robot.center[1],self.robot.center[2], self.robot.orientation[0],self.param_FormPisci)
-
-
-        while self.robot.center[0]<10:
-            w.delete(self.rob1)
-            w.delete(self.rob2)
-            rob(self.robot.center[0],self.robot.center[1],self.robot.center[2], self.robot.orientation[0],self.param_FormPisci)
-            w.after(200)
-            w.update()"""
 
 class button_config():
 
