@@ -1,4 +1,4 @@
-from time import localtime
+from time import *
 from Application import *
 
 __author__ = 'Adrien'
@@ -17,20 +17,18 @@ def define_file():
 
 class Simulateur(Thread):
     def __init__(self):
-        super().__init__()
         print("starting main init")
         self.robot = Robot(0)
         self.server = ModbusServer()  # Serveur
         self.physique = MoteurPhysique(self.robot, self.server, 0.01, 50, 9.81, 1)  # Moteur Physique
-        self.window = Application(self.physique)  # Interface Graphique
+        self.window = Application(self)  # Interface Graphique
         self.window.start()
         self.started = False
         self.filename = define_file()
         self.init_time = time.time()
         print("HI")
         while not self.window.inited:
-            print(self.window.inited)
-            sleep(0.05)
+            sleep(1)
         print("starting")
         self.start()
 
@@ -57,7 +55,7 @@ class Simulateur(Thread):
         #self.server.start()
         while self.started:
             self.log()
-            sleep(1)
+            sleep(0.5)
         print("Final phase started")
         self.physique.stop()
         #self.server.stop()

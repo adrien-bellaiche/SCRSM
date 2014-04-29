@@ -160,7 +160,7 @@ def produit(a,b):
             temp=0
         return c
     else:
-        0() # bug provoqué
+        0() # bug provoque
     
 def mult(a,vect):
     # Produit matrice * vecteur avec les parametres dans l'ordre intuitif
@@ -197,7 +197,7 @@ class ObjetPhysique():
         t = vect(self, target) # vector self->Target
         us = [rotation([1, 0, 0], self.mat), rotation([0, 1, 0], self.mat), rotation([0, 0, 1], self.mat),
               rotation([1, 0, 0], target.mat), rotation([0, 1, 0], target.mat), rotation([0, 0, 1], target.mat)]
-        # Todo : voir si la version basique est encore justifiée (chrono ?)
+        # Note : voir si la version basique est encore justifiee (chrono ?)
         for k in range(6):
             L = us[k]
             left = abs(dot(t, L))  # si >right, alors c'est un axe separateur.
@@ -288,15 +288,9 @@ class Robot(ObjetPhysique):
 
 
 class Sphere(ObjetPhysique):  # Fini, a tester
-    def __init__(self, *args):
-        if len(args) == 1:
-            x, y, z, r = args[0]
-        elif len(args) == 4:
-            x, y, z, r = args[0:4]
+    def __init__(self, x, y, z, r):
         super().__init__(x, y, z, 0, 0, 0, 2 * r, 2 * r, 2 * r)
         self.rayon = r
-
-
 
     def accurate_collision(self, robot):
         # Distance a chaque plan genere par les faces "repositionne" au centre du robot. Si au moins une est superieure a self.rayon + base[i]/2 alors, pas de collision. Sinon, collision.
@@ -309,11 +303,7 @@ class Sphere(ObjetPhysique):  # Fini, a tester
 
 
 class Cylindre(ObjetPhysique):  # si les angles sont a 0, c'est un cylindre d'axe Z
-    def __init__(self, *args):
-        if len(args) == 8:
-            x, y, z, r, h, theta, phi, psi = args[0:8]
-        elif len(args) == 1:
-            x, y, z, r, h, theta, phi, psi = args[0]
+    def __init__(self, x, y, z, r, h, theta, phi, psi):
         super().__init__(x, y, z, theta, phi, psi, 2 * r, 2 * r, h)
         self.rayon = r
         self.hauteur = h
@@ -323,5 +313,4 @@ class Pave(ObjetPhysique):
     def __init__(self, x, y, z, theta, phi, psi, lo, la, he):
         #longueur selon x, largeur selon y, hauteur selon z (de base)
         super().__init__(x, y, z, theta, phi, psi, lo, la, he)
-
 
