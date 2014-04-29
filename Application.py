@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 from tkinter import *
-import math
-import os
-from threading import Thread
-from ServerTricked import *
-from MoteurPhysique import *
-from Physique import *
-from time import sleep
-from View import *
 
+from View import *
 
 
 ligne = 4
@@ -145,18 +138,13 @@ class Application(Thread,Frame):
         self.button_dessus.config(state = DISABLED)
         self.button_camera.config(state = DISABLED)
         self.simu.started=False
+        self.button_arret.config(state=DISABLED)
+
 
     def press_cameraRobot(self):
         print("camera robot")
-        """self.moteur.obstacles.append(Cylindre(0, -3,-11,0.3,10,180,0,0))
-        self.moteur.obstacles[-1].texture=[1.,1.,1.]
-        self.moteur.obstacles.append(Cylindre(2, -3,-11,0.3,20,0,0,0))
-        self.moteur.obstacles[-1].texture=[0.8,0.2,0.1]
-        self.moteur.obstacles.append(Pave(1,0,-6,45,0,0,1, 0.333, 0.1))
-        self.moteur.obstacles[-1].texture=[0.5,0.,1]
-        self.moteur.obstacles.append(Sphere(-1,0,-6,0.333))
-        vue=Sight(self.moteur)
-        vue.start()"""
+        vue=Sight(self.moteur,True)
+        vue.start()
 
     def create_capteurs(self): # liste des capteurs et leurs valeurs
 
@@ -220,8 +208,29 @@ class Application(Thread,Frame):
             self.defa_tuyau = self.defa_tuyau[0].split(',')
             saved_file.close()
 
+        def set_params_in_physique():
+            print("test")
+            print(self.checks)
+            print(self.param_FormPisci)
+            print(self.param_balleRou[0],self.param_balleRou[1],self.param_balleRou[2],self.param_balleRou[3])
+            print(self.param_balleJau)
+            print(self.param_FormTube)
+            print(self.param_tubes)
+            if self.checks[1] == 1:
+                self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
+            if self.checks[2] == 1:
+                self.moteur.obstacles.append(Sphere(self.param_balleJau[0:4]))
+            if self.checks[3] == 1:
+                
+            #liste obss
+            #for
+            # sphere : obss.append(Sphere(sdsdfsdfsd))
+            # pave : asdfg
+
         def press_ok():
-            get_param()             # prendre les parametres inserés pour l'utilisateur
+            get_param()
+            set_params_in_physique()
+            """            # prendre les parametres inserés pour l'utilisateur
             if not self.isOk:       # si les parametres inserés sont bons continue si non message d'erreur
                top = Toplevel()
                top.title("Error")
@@ -230,10 +239,10 @@ class Application(Thread,Frame):
 
                button = Button(top, text="Ok", command=top.destroy)
                button.pack()
-            else:
-                self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
-                press_config_save()                             # sauveguarde des parametres
-                win.destroy()                                   # ferme la fenetre config
+            else:"""
+            self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
+            press_config_save()                             # sauveguarde des parametres
+            win.destroy()                                   # ferme la fenetre config
 
         def addTuyau():     # action du bouton + tuyau
             temp = ligneTuyau(win,5+self.numTuyau,colunne_config,boxTaille) # creation de une ligne dans la config pour inserer un nouveau tuyau
@@ -281,6 +290,12 @@ class Application(Thread,Frame):
                 else:
                     saved_file.write("%s\n" % self.defa_tuyau[i])
             saved_file.close()
+
+
+
+
+            print('hello')
+
 
         def press_restore_default():    # restore le config default
             self.isConfigDefault = True
@@ -343,6 +358,8 @@ class Application(Thread,Frame):
                 win.formTuyauL.config(state = NORMAL)
                 win.formTuyauR.config(state = NORMAL)
                 win.formTuyauTheta.config(state = NORMAL)
+                win.formTuyauPhi.config(state = NORMAL)
+                win.formTuyauPsi.config(state = NORMAL)
             else:      # si non les entrées sont desactivés
                 win.posTuyX.config(state = DISABLED)
                 win.posTuyY.config(state = DISABLED)
@@ -350,6 +367,9 @@ class Application(Thread,Frame):
                 win.formTuyauL.config(state = DISABLED)
                 win.formTuyauR.config(state = DISABLED)
                 win.formTuyauTheta.config(state = DISABLED)
+                win.formTuyauPsi.config(state = DISABLED)
+                win.formTuyauPhi.config(state = DISABLED)
+
 
         def PisciIsOk(x,y,z): # verification des dimensions de la piscine
             if (x>=self.maxMinPisci[0] and x<=self.maxMinPisci[1] and y>=self.maxMinPisci[2] and y<=self.maxMinPisci[3] and z>=self.maxMinPisci[4] and z<=self.maxMinPisci[5]):
@@ -401,7 +421,7 @@ class Application(Thread,Frame):
             self.param_balleRou.append(win.posBallRouZ.get())
             self.param_balleRou.append(win.posBallRouR.get())
             self.param_balleRou.append(self.ball_color1.get())
-            self.param_balleRou = [int(i) for i in self.param_balleRou]
+            self.param_balleRou = [float(i) for i in self.param_balleRou]
 
             # verification si les parametres sont ok
             self.isOk = self.isOk*balleIsOk(self.param_balleRou[0],self.param_balleRou[1],self.param_balleRou[2],self.param_balleRou[3],self.param_FormPisci)
@@ -411,7 +431,7 @@ class Application(Thread,Frame):
             self.param_balleJau.append(win.posBallJauZ.get())
             self.param_balleJau.append(win.posBallJauR.get())
             self.param_balleJau.append(self.ball_color2.get())
-            self.param_balleJau = [int(i) for i in self.param_balleJau]
+            self.param_balleJau = [float(i) for i in self.param_balleJau]
             self.isOk = self.isOk*self.isOk*balleIsOk(self.param_balleJau[0],self.param_balleJau[1],self.param_balleJau[2],self.param_balleJau[3],self.param_FormPisci)
 
 
@@ -435,7 +455,7 @@ class Application(Thread,Frame):
                     self.param_FormTube.append(self.tuyau[i].formTuyauTheta.get())
                     self.param_FormTube.append(self.tuyau[i].formTuyauPhi.get())
                     self.param_FormTube.append(self.tuyau[i].formTuyauPsi.get())
-            self.param_FormTube = [int(i) for i in self.param_FormTube]
+            self.param_FormTube = [float(i) for i in self.param_FormTube]
             self.isOk = self.isOk*tuyauIsOk(self.param_FormTube[0],self.param_FormTube[1],self.param_FormTube[2],self.param_FormTube[3],self.param_FormTube[4],self.param_FormPisci)
 
 

@@ -17,6 +17,7 @@ def define_file():
 
 class Simulateur(Thread):
     def __init__(self):
+        super().__init__()
         print("starting main init")
         self.robot = Robot(0)
         self.server = ModbusServer()  # Serveur
@@ -25,7 +26,7 @@ class Simulateur(Thread):
         self.window.start()
         self.started = False
         self.filename = define_file()
-        self.init_time = time.time()
+        self.init_time = time()
         print("HI")
         while not self.window.inited:
             sleep(1)
@@ -33,7 +34,7 @@ class Simulateur(Thread):
         self.start()
 
     def log(self):
-        ti = str(time.time() - self.init_time) + ' '
+        ti = str(time() - self.init_time) + ' '
         x = str(self.robot.center[0]) + ' '
         y = str(self.robot.center[1]) + ' '
         z = str(self.robot.center[2]) + ' '
@@ -65,4 +66,3 @@ class Simulateur(Thread):
 
 if __name__ == '__main__':
     sim = Simulateur()
-    sim.robot.speed[0] = 1

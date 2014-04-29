@@ -111,7 +111,9 @@ class MoteurPhysique(Thread):
         global CONSTANTES
         
         chrono=time()
-        
+
+
+
         self.running = True
         while self.running:
             debut=time()
@@ -135,7 +137,7 @@ class MoteurPhysique(Thread):
 
     def detect_collisions(self):
         for obs in self.obstacles:
-            if obs.collideswith(self.robot):
+            if obs.collides_with(self.robot):
                 return True
         return False
         
