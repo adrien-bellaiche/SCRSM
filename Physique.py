@@ -288,7 +288,11 @@ class Robot(ObjetPhysique):
 
 
 class Sphere(ObjetPhysique):  # Fini, a tester
-    def __init__(self, x, y, z, r):
+    def __init__(self, *args):
+        if len(args) == 4:
+            x, y, z, r, = args[0:4]
+        elif len(args) == 1:
+            x, y, z, r = args[0]
         super().__init__(x, y, z, 0, 0, 0, 2 * r, 2 * r, 2 * r)
         self.rayon = r
 
@@ -303,7 +307,11 @@ class Sphere(ObjetPhysique):  # Fini, a tester
 
 
 class Cylindre(ObjetPhysique):  # si les angles sont a 0, c'est un cylindre d'axe Z
-    def __init__(self, x, y, z, r, h, theta, phi, psi):
+    def __init__(self, *args):
+        if len(args) == 8:
+            x, y, z, r, h, theta, phi, psi = args[0:8]
+        elif len(args) == 1:
+            x, y, z, r, h, theta, phi, psi = args[0]
         super().__init__(x, y, z, theta, phi, psi, 2 * r, 2 * r, h)
         self.rayon = r
         self.hauteur = h
