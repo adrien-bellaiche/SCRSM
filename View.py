@@ -41,7 +41,7 @@ def boite(L,l,h,couleur=[1,0.5,0]):             # centree en G    OK
     B(GL_QUADS); V( L,-l, h);V(-L,-l, h);V(-L,-l,-h);V( L,-l,-h); E()  #face avg
     B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
     
-def pisc(L,l,h,couleur=[0,1,1]):                # OK
+def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     """ Construit la piscine sans eau avec fond mauve a partir des trois dimensions.
         Param :
             L -- Longueur
@@ -51,20 +51,30 @@ def pisc(L,l,h,couleur=[0,1,1]):                # OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
-    glColor3f(couleur[0],couleur[1],couleur[2])
-    B(GL_QUADS); V( L,-l,-h);V( L,-l, h);V( L, l, h);V( L, l,-h); E() #face arriere
-    glColor3f(0.5,0,0.5)
-    B(GL_QUADS); V( L,-l,-h);V( L, l,-h);V(-L, l,-h);V(-L,-l,-h); E() # dessous
-    glColor3f(couleur[0],couleur[1],couleur[2])
-    B(GL_QUADS); V( L, l, h);V(-L, l, h);V(-L, l,-h);V( L, l,-h); E() #face avd
-    B(GL_QUADS); V( L,-l, h);V(-L,-l, h);V(-L,-l,-h);V( L,-l,-h); E()  #face avg
-    B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
-    
+    if (textures != -1):
+        glColor3f(1,1,1)    
+        glBindTexture( GL_TEXTURE_2D, 0 )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(2,0); V(-L, l,-h);glTexCoord2d(2,1); V(-L,-l,-h); E() # dessous
+        glBindTexture( GL_TEXTURE_2D, 1 )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # face arriere
+        B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # face avd
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L,-l,-h);glTexCoord2d(1,1); V( L,-l,-h); E() # face avg
+        B(GL_QUADS); glTexCoord2d(0,1); V(-L,-l,-h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L, l, h);glTexCoord2d(1,1); V(-L, l,-h); E() # face avant
+    else:
+        glColor3f(couleur[0],couleur[1],couleur[2])
+        B(GL_QUADS); V( L,-l,-h);V( L,-l, h);V( L, l, h);V( L, l,-h); E() #face arriere
+        glColor3f(0.5,0,0.5)
+        B(GL_QUADS); V( L,-l,-h); V( L, l,-h); V(-L, l,-h); V(-L,-l,-h); E() # dessous
+        glColor3f(couleur[0],couleur[1],couleur[2])
+        B(GL_QUADS); V( L, l, h);V(-L, l, h);V(-L, l,-h);V( L, l,-h); E() #face avd
+        B(GL_QUADS); V( L,-l, h);V(-L,-l, h);V(-L,-l,-h);V( L,-l,-h); E()  #face avg
+        B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
+        
 class Sight(Thread):
     def __init__(self, moteurPhysique,camera):  # a "potato.txt" pres, c'est ca
         super().__init__()
         self.moteur = moteurPhysique
-        self.textures = 0
+        self.textures = -1
         name = "potato.txt"  # generer un nom etant "graphiclog_date_heure.txt" je crois que j'ai deja fait ca dans le simu global
         self.logfile = os.path.join(name)
         self.log("New Sight: Hello")
@@ -101,6 +111,10 @@ class Sight(Thread):
         #self.load_textures("0.png")
         #self.load_textures("robot.png")
         #self.load_textures("piscine.png")
+        if os.path.exists("textures"):
+            self.textures = 0
+            self.load_textures("fond.jpg")  # 0
+            self.load_textures("mur.jpg")   # 1
         
         # Turn On Fog
         glEnable(GL_FOG);
@@ -180,9 +194,9 @@ class Sight(Thread):
             param :
                 name -- nom de l'image a charger
         """
-        texturefile = os.path.join(name)
-        #texturefile = os.path.join('textures', name)
-        print("Loading : %s"%texturefile)
+        #texturefile = os.path.join(name)
+        texturefile = os.path.join('textures', name)
+        print("Loading :",texturefile)
         textureSurface = pygame.image.load(texturefile) 
         if not textureSurface: # A verifier aussi
             self.log("FAILURE texture load attempt " + str(name))
@@ -385,7 +399,7 @@ class Sight(Thread):
         if not self.camera:
             glTranslatef(s0,s1,s2)
             glRotatef(rx, 1.0, 0.0, 0.0); glRotatef(ry , 0.0, 1.0, 0.0); glRotatef(rz , 0.0, 0.0, 1.0)
-            pisc(lo,la,he)
+            pisc(lo,la,he,textures=self.textures)
         else :
         
             glRotatef(90   , 0.0, 0.0, 1.0)
@@ -395,5 +409,5 @@ class Sight(Thread):
             glRotatef(rz-psi   , 0.0, 0.0, 1.0)
             glTranslatef(s0-r0, s1-r1,s2-r2)
             glTranslatef(-0.5* self.moteur.robot.base[0],0,0)
-            pisc(lo,la,he)
+            pisc(lo,la,he,textures=self.textures)
 
