@@ -707,11 +707,15 @@ class Application(Thread,Frame):
         vue=Sight(self.moteur,v.get())
         print(vue.moteur.robot.orientation)
         vue.start()
-        self.robot.center[0]=-2
         self.inited=True
+        self.robot.center[2]=-2
+        angle=0
         while True:
             sleep(0.1)
-            self.robot.orientation[1]-=0.05
+            self.robot.center[0]=cos(angle)-2
+            self.robot.center[1]=sin(angle)
+            self.robot.orientation[2]=angle+pi/2
+            angle+=0.1
 
 
 class button_config():
