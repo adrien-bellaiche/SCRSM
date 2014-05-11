@@ -701,11 +701,9 @@ class Application(Thread,Frame):
         lelele = button_config(win, ligneButton, press_ok,press_config_save,press_restore_default)
 
     def press_demarrage(self):
-        print(self.moteur.obstacles)
         print("DEMARRAGE")
         self.button_arret.config(state=NORMAL)
         vue=Sight(self.moteur,v.get())
-        print(vue.moteur.robot.orientation)
         vue.start()
         self.inited=True
         self.robot.center[2]=-2
