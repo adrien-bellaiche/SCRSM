@@ -23,7 +23,7 @@ def date():
     h=asctime()
     return h[8:10]+h[4:7]+h[22:24]+'-'+h[11:13]+h[14:16]+h[17:19]
 
-def boite(L,l,h,couleur=[1,0.5,0]):             # centree en G    OK
+def boite(L,l,h,couleur=[1,0.5,0],textures=-1):             # centree en G    OK
     """ Construit un pave a partir des trois dimensions.
         Param :
             L -- Longueur
@@ -33,13 +33,31 @@ def boite(L,l,h,couleur=[1,0.5,0]):             # centree en G    OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
-    glColor3f(couleur[0],couleur[1],couleur[2])
-    B(GL_QUADS); V( L,-l,-h);V( L,-l, h);V( L, l, h);V( L, l,-h); E() #face arriere
-    B(GL_QUADS); V( L,-l, h);V( L, l, h);V(-L, l, h);V(-L,-l, h); E() # dessus
-    B(GL_QUADS); V( L,-l,-h);V( L, l,-h);V(-L, l,-h);V(-L,-l,-h); E() # dessous
-    B(GL_QUADS); V( L, l, h);V(-L, l, h);V(-L, l,-h);V( L, l,-h); E() #face avd
-    B(GL_QUADS); V( L,-l, h);V(-L,-l, h);V(-L,-l,-h);V( L,-l,-h); E()  #face avg
-    B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
+    key=textures.keys()
+    if 'haut.jpg' in key and 'bas.jpg' in key and 'gauche.jpg' in key and 'droite.jpg' in key and 'av.jpg' in key and 'arr.jpg' in key:
+        #glEnable(GL_TEXTURE_2D)
+        glColor3f(1,1,1)    
+        glBindTexture( GL_TEXTURE_2D, textures['bas.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V(-L,-l,-h); E() # dessous
+        glBindTexture( GL_TEXTURE_2D, textures['av.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # avant
+        glBindTexture( GL_TEXTURE_2D, textures['haut.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V( L, l, h);glTexCoord2d(1,0); V(-L, l, h);glTexCoord2d(1,1); V(-L,-l, h); E() # dessus
+        glBindTexture( GL_TEXTURE_2D, textures['gauche.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # cote gauche
+        glBindTexture( GL_TEXTURE_2D, textures['droite.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L,-l,-h);glTexCoord2d(1,1); V( L,-l,-h); E() # cote droit
+        glBindTexture( GL_TEXTURE_2D, textures['arr.jpg'] )
+        B(GL_QUADS); glTexCoord2d(0,1); V(-L,-l,-h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L, l, h);glTexCoord2d(1,1); V(-L, l,-h); E() # arriere
+        #glDisable(GL_TEXTURE_2D)
+    else:
+        glColor3f(couleur[0],couleur[1],couleur[2])
+        B(GL_QUADS); V( L,-l,-h);V( L,-l, h);V( L, l, h);V( L, l,-h); E() #face arriere
+        B(GL_QUADS); V( L,-l, h);V( L, l, h);V(-L, l, h);V(-L,-l, h); E() # dessus
+        B(GL_QUADS); V( L,-l,-h);V( L, l,-h);V(-L, l,-h);V(-L,-l,-h); E() # dessous
+        B(GL_QUADS); V( L, l, h);V(-L, l, h);V(-L, l,-h);V( L, l,-h); E() #face avd
+        B(GL_QUADS); V( L,-l, h);V(-L,-l, h);V(-L,-l,-h);V( L,-l,-h); E()  #face avg
+        B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
     
 def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     """ Construit la piscine sans eau avec fond mauve a partir des trois dimensions.
@@ -51,11 +69,13 @@ def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
+    glTranslatef(0,0,-h)                # /!\ necessaire pour avoir le haut de la piscine en z=0
+    
     if (textures != -1):
         glColor3f(1,1,1)    
-        glBindTexture( GL_TEXTURE_2D, 0 )
+        glBindTexture( GL_TEXTURE_2D, textures['fond.jpg'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(2,0); V(-L, l,-h);glTexCoord2d(2,1); V(-L,-l,-h); E() # dessous
-        glBindTexture( GL_TEXTURE_2D, 1 )
+        glBindTexture( GL_TEXTURE_2D, textures['mur.jpg'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # face arriere
         B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # face avd
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L,-l,-h);glTexCoord2d(1,1); V( L,-l,-h); E() # face avg
@@ -101,7 +121,7 @@ class Sight(Thread):
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
 
-    def prep(self):                             # implanter les textures (?)
+    def prep(self):
         """ Initialise la fenetre OpenGL
             -> gere la perspective, la couleur de fond, le brouillard et la profondeur
         """
@@ -112,9 +132,16 @@ class Sight(Thread):
         #self.load_textures("robot.png")
         #self.load_textures("piscine.png")
         if os.path.exists("textures"):
-            self.textures = 0
-            self.load_textures("fond.jpg")  # 0
-            self.load_textures("mur.jpg")   # 1
+            self.textures = {}
+            self.textures['']=-1
+            self.load_textures("fond.jpg")
+            self.load_textures("mur.jpg")
+            self.load_textures("haut.jpg")
+            self.load_textures("bas.jpg")
+            self.load_textures("gauche.jpg")
+            self.load_textures("droite.jpg")
+            self.load_textures("av.jpg")
+            self.load_textures("arr.jpg")
         
         # Turn On Fog
         glEnable(GL_FOG);
@@ -196,21 +223,25 @@ class Sight(Thread):
         """
         #texturefile = os.path.join(name)
         texturefile = os.path.join('textures', name)
-        print("Loading :",texturefile)
-        textureSurface = pygame.image.load(texturefile) 
-        if not textureSurface: # A verifier aussi
-            self.log("FAILURE texture load attempt " + str(name))
-            return 0
-        textureData = pygame.image.tostring(textureSurface, "RGBX", 1)
-        glBindTexture(GL_TEXTURE_2D, self.textures)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSurface.get_width(), textureSurface.get_height(), 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, textureData)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-        self.textures += 1
-        self.log("SUCCESS texture loaded " + str(name) + " as " + str(
-            self.textures-1)) # A verifier que ca rende bien un str propre
-        return self.textures - 1 # oui, faut incrementer le self.textures, mais c'est bien le code premier qui compte.
+        if os.path.exists(texturefile):
+            print("Loading :",texturefile)
+            textureSurface = pygame.image.load(texturefile) 
+            if not textureSurface: # A verifier aussi
+                self.log("FAILURE texture load attempt " + str(name))
+                return 0
+            textureData = pygame.image.tostring(textureSurface, "RGBX", 1)
+            
+            self.textures[name]=max(self.textures.values())+1
+            glBindTexture(GL_TEXTURE_2D, self.textures[name])
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSurface.get_width(), textureSurface.get_height(), 0, GL_RGBA,
+                         GL_UNSIGNED_BYTE, textureData)
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+            self.log("SUCCESS texture loaded " + name + " as " + str(
+                self.textures[name])) # A verifier que ca rende bien un str propre
+            return self.textures[name] # oui, faut incrementer le self.textures, mais c'est bien le code premier qui compte.
+        else:
+            return -1
 
 
     def robotConstructor(self, robot):          # OK
@@ -223,18 +254,18 @@ class Sight(Thread):
             pass
         else:
             glLoadIdentity()
-            glColor3f(1,0,0)
             [lo,la,he]  = robot.base
             [rx, ry, rz]= robot.orientation
             [x,y,z]     = robot.center
             rx*=180/pi;ry*=180/pi;rz*=180/pi        # OpenGL travaille en degres.
             glTranslatef(x,y,z) 
             glRotatef(rx, 1.0, 0.0, 0.0); glRotatef(ry , 0.0, 1.0, 0.0); glRotatef(rz , 0.0, 0.0, 1.0)
-            boite(lo,la,he,[1,1,0])
             glTranslatef(0.5*lo,0,0)
-            sph=gluNewQuadric()
             glColor3f(0.3,0.3,0.9)
+            sph=gluNewQuadric()
             gluSphere(sph,0.1,8,8)      # la camera
+            glTranslatef(-0.5*lo,0,0)
+            boite(lo,la,he,[1,1,0],self.textures)
             
 
 
@@ -400,8 +431,7 @@ class Sight(Thread):
             glTranslatef(s0,s1,s2)
             glRotatef(rx, 1.0, 0.0, 0.0); glRotatef(ry , 0.0, 1.0, 0.0); glRotatef(rz , 0.0, 0.0, 1.0)
             pisc(lo,la,he,textures=self.textures)
-        else :
-        
+        else :        
             glRotatef(90   , 0.0, 0.0, 1.0)
             glRotatef(90   , 0.0, 1.0, 0.0)
             glRotatef(rx-phi   , 1.0, 0.0, 0.0)
