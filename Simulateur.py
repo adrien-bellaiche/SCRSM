@@ -21,6 +21,7 @@ class Simulateur(Thread):
         super().__init__()
         print("starting main init")
         self.robot = Robot(0)
+        self.robot.center[2]=-3 #!
         self.server = ModbusServer()  # Serveur
         self.physique = MoteurPhysique(self.robot, self.server, 0.01, 50, 9.81, 1)  # Moteur Physique
         self.window = Application(self)  # Interface Graphique
@@ -54,6 +55,7 @@ class Simulateur(Thread):
     def run(self):
         self.started = True
         self.physique.start()
+        Commandes.en_arriere(self.server,10,duree=-1)
         #self.server.start()
         while self.started:
             self.log()

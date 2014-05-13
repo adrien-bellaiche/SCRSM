@@ -37,20 +37,20 @@ def boite(L,l,h,couleur=[1,0.5,0],textures=-1):             # centree en G    OK
         key=[]
     else:
         key=textures.keys()
-    if 'haut.jpg' in key and 'bas.jpg' in key and 'gauche.jpg' in key and 'droite.jpg' in key and 'av.jpg' in key and 'arr.jpg' in key:
+    if 'haut' in key and 'bas' in key and 'gauche' in key and 'droite' in key and 'av' in key and 'arr' in key:
         #glEnable(GL_TEXTURE_2D)
         glColor3f(1,1,1)    
-        glBindTexture( GL_TEXTURE_2D, textures['bas.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['bas'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V(-L,-l,-h); E() # dessous
-        glBindTexture( GL_TEXTURE_2D, textures['av.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['av'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # avant
-        glBindTexture( GL_TEXTURE_2D, textures['haut.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['haut'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V( L, l, h);glTexCoord2d(1,0); V(-L, l, h);glTexCoord2d(1,1); V(-L,-l, h); E() # dessus
-        glBindTexture( GL_TEXTURE_2D, textures['gauche.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['gauche'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # cote gauche
-        glBindTexture( GL_TEXTURE_2D, textures['droite.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['droite'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L,-l,-h);glTexCoord2d(1,1); V( L,-l,-h); E() # cote droit
-        glBindTexture( GL_TEXTURE_2D, textures['arr.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['arr'] )
         B(GL_QUADS); glTexCoord2d(0,1); V(-L,-l,-h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L, l, h);glTexCoord2d(1,1); V(-L, l,-h); E() # arriere
         #glDisable(GL_TEXTURE_2D)
     else:
@@ -75,9 +75,9 @@ def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     
     if (textures != -1):
         glColor3f(1,1,1)    
-        glBindTexture( GL_TEXTURE_2D, textures['fond.jpg'] )
-        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(2,0); V(-L, l,-h);glTexCoord2d(2,1); V(-L,-l,-h); E() # dessous
-        glBindTexture( GL_TEXTURE_2D, textures['mur.jpg'] )
+        glBindTexture( GL_TEXTURE_2D, textures['fond'] )
+        B(GL_QUADS); glTexCoord2d(0,2); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(4,0); V(-L, l,-h);glTexCoord2d(4,2); V(-L,-l,-h); E() # dessous
+        glBindTexture( GL_TEXTURE_2D, textures['mur'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # face arriere
         B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # face avd
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l, h); glTexCoord2d(0,0); V(-L,-l, h);glTexCoord2d(1,0); V(-L,-l,-h);glTexCoord2d(1,1); V( L,-l,-h); E() # face avg
@@ -133,14 +133,14 @@ class Sight(Thread):
         if os.path.exists("textures"):
             self.textures = {}
             self.textures['']=-1
-            self.load_textures("fond.jpg")
-            self.load_textures("mur.jpg")
-            self.load_textures("haut.jpg")
-            self.load_textures("bas.jpg")
-            self.load_textures("gauche.jpg")
-            self.load_textures("droite.jpg")
-            self.load_textures("av.jpg")
-            self.load_textures("arr.jpg")
+            self.load_textures("fond.png")
+            self.load_textures("mur.png")
+            self.load_textures("haut.png")
+            self.load_textures("bas.png")
+            self.load_textures("gauche.png")
+            self.load_textures("droite.png")
+            self.load_textures("av.png")
+            self.load_textures("arr.png")
         
         # Turn On Fog
         glEnable(GL_FOG);
@@ -187,6 +187,8 @@ class Sight(Thread):
         '''
         self.log("fps:  %d" % ((frames*1000)/(pygame.time.get_ticks()-ticks)))
 
+    def stop(self):
+        self.running = False
 
     def draw(self):                             # OK
         """ Fonction de rafraichissement de l'affichage
@@ -203,7 +205,7 @@ class Sight(Thread):
         """ Dessin des obstacles
             Differencie les obstacles selon leur type et appelle la fonction correspondante
         """
-
+        
         if(obstacle.__class__.__name__=="Cylindre"):
             self.cylinderConstructor(obstacle)
         elif(obstacle.__class__.__name__=="Sphere"):
@@ -223,13 +225,13 @@ class Sight(Thread):
         #texturefile = os.path.join(name)
         texturefile = os.path.join('textures', name)
         if os.path.exists(texturefile):
-            print("Loading :",texturefile)
+            #print("Loading :",texturefile)
             textureSurface = pygame.image.load(texturefile) 
             if not textureSurface: # A verifier aussi
                 self.log("FAILURE texture load attempt " + str(name))
                 return 0
             textureData = pygame.image.tostring(textureSurface, "RGBX", 1)
-            
+            name=name.split('.')[0]
             self.textures[name]=max(self.textures.values())+1
             glBindTexture(GL_TEXTURE_2D, self.textures[name])
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureSurface.get_width(), textureSurface.get_height(), 0, GL_RGBA,
@@ -237,8 +239,8 @@ class Sight(Thread):
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
             self.log("SUCCESS texture loaded " + name + " as " + str(
-                self.textures[name])) # A verifier que ca rende bien un str propre
-            return self.textures[name] # oui, faut incrementer le self.textures, mais c'est bien le code premier qui compte.
+                self.textures[name]))
+            return self.textures[name]
         else:
             return -1
 

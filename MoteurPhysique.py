@@ -122,7 +122,7 @@ class MoteurPhysique(Thread):
             
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
-                break
+                self.running = False
             
             pauze=debut+self.framerate-time()
             if pauze>0:
@@ -130,7 +130,7 @@ class MoteurPhysique(Thread):
             else :
                 print("En retard :",pauze)
             # else : si on est en retard, on fait quoi ?
-        
+        self.stop()
 
     def stop(self):
         self.running = False

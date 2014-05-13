@@ -341,7 +341,7 @@ class Piscine(ObjetPhysique):
         p =[[1, 0, 0],[0, 1, 0],[0, 0, 1]]
         us = [rotation(p[0], target.mat), rotation(p[1], target.mat), rotation(p[2], target.mat)]
         for k in range(5): #test du plan en -x, x,-y,y,-z.
-            ra = abs(target.center[k%3] - self.base[k%3]*((2*int(k/3))-1)/2.0)  #TGCM #C'est la distance entre le plan de la piscine testée et le centre du robot
+            ra = abs(target.center[k%3] - self.center[k%3] - self.base[k%3]*((2*int(k/3))-1)/2.0)  #TGCM #C'est la distance entre le plan de la piscine testée et le centre du robot
             contrib = 0
             for w in range(3):
                 contrib += target.base[w]/2 * dot(p[w], us[w])
