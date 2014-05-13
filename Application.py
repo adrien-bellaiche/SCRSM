@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from tkinter import *
-
+from PIL import Image, ImageTk
 from View import *
+import Commandes
+
+
 
 
 ligne = 4
@@ -20,9 +23,9 @@ class Application(Thread,Frame):
         Frame.__init__(self, self.master)
         self.master.title("Simulateur - SCRSM")
         self.grid()
-        self.config_default=[]
-        self.config_saved=[]
-        self.param_config=[]
+        self.config_default = []
+        self.config_saved = []
+        self.param_config = []
         self.defa_checks = []
         self.defa_piscine = []
         self.defa_ball_1 = []
@@ -52,11 +55,12 @@ class Application(Thread,Frame):
         self.param_FormTube_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.update()
         self.bool_camera = IntVar()
-        self.numTuyau   = 0
+        self.numTuyau = 0
+
 
     def run(self):
         self.master.mainloop()
-        print("done")
+        print("Application.run : done")
 
     def update(self):       # mise a jour des datas
         self.dataCAP.set(str(self.robot.orientation[2]))
@@ -91,8 +95,6 @@ class Application(Thread,Frame):
     def create_widget(self): # config button - start button - camera button - Up View button
         global v
         self.master.protocol('WM_DELETE_WINDOW', self.onExit)
-
-        w_button_cameras = 20
 
         self.button_config = Button(self, text = "Configuration", command = self.winConfig,height=3)
         self.button_config.grid(row = 0, column = 0, columnspan = 2,sticky=W+E, padx=5,pady=5)
@@ -211,7 +213,7 @@ class Application(Thread,Frame):
             saved_file.close()
 
         def set_params_in_physique():
-            self.moteur.obstacles.append(Pave(0,0,0,0,0,0, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
+            self.moteur.obstacles.append(Piscine(-self.param_FormPisci[2]*0.5, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
             if self.checks[0] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
                 if self.param_balleRou[4] == 1: # rouge
@@ -232,9 +234,7 @@ class Application(Thread,Frame):
                 self.moteur.obstacles.append(Cylindre(self.param_FormTube[0:8]))
             if self.numTuyau:
                 for i in range(0,len(self.param_tubes),8):
-                    print(i,len(self.param_tubes),range(0,len(self.param_tubes),8))
                     self.moteur.obstacles.append(Cylindre(self.param_tubes[i:i+8]))
-
 
         def press_ok():
             get_param()
@@ -702,17 +702,15 @@ class Application(Thread,Frame):
         lelele = button_config(win, ligneButton, press_ok,press_config_save,press_restore_default)
 
     def press_demarrage(self):
-        print(self.moteur.obstacles)
+        Commande(self.simu)
         print("DEMARRAGE")
         self.button_arret.config(state=NORMAL)
-        vue=Sight(self.moteur,v.get())
-        print(vue.moteur.robot.orientation)
-        vue.start()
-        self.robot.center[0]=-2
+        #vue=Sight(self.moteur,v.get())
+        #vue.start()
         self.inited=True
-        while True:
-            sleep(0.1)
-            self.robot.center[2]-=0.05
+
+
+
 
 
 class button_config():
@@ -792,5 +790,54 @@ class ligneTuyau():
         self.virgule7.grid_forget()
         self.openPare.grid_forget()
         self.closePare.grid_forget()
+
+class Commande(Thread,Frame):
+
+    def __init__(self, simulation):
+        super(Commande, self).__init__()
+        self.master = Tk()
+        Frame.__init__(self, self.master)
+        self.create_win_commande()
+        self.simu = simulation
+
+    def action_monter(self):
+        Commandes.en_haut(self.simu.server,10,1)
+    def action_plonger(self):
+        Commandes.en_bas(self.simu.server,10,-1)
+    def action_avant(self):
+        Commandes.en_avant(self.simu.server,10,-1)
+    def action_arriere(self):
+        Commandes.en_arriere(self.simu.server,10,-1)
+    def action_droite(self):
+        Commandes.crabe_droite(self.simu.server,10,-1)
+    def action_gauche(self):
+        Commandes.crabe_gauche(self.simu.server,10,-1)
+    def action_rot_antihoraire(self):
+        Commandes.a_gauche(self.simu.server,10,-1)
+    def action_rot_horaire(self):
+        Commandes.a_droite(self.simu.server,10,-1)
+    def action_stop(self):
+        Commandes.stop()
+
+
+    def create_button(self,ligne,colonne,action, texte):
+
+        self.button = Button(self.master, text = texte, command = action,height = 3,width = 6)
+        self.button.grid(row = ligne, column = colonne, padx=5,pady=5)
+
+
+    def create_win_commande(self):
+
+        button00 = self.create_button(0,0,self.action_monter,chr(24))
+        button01 = self.create_button(0,1,self.action_avant,"^")
+        button02 = self.create_button(0,2,self.action_rot_antihoraire,chr(27))
+        button10 = self.create_button(1,0,self.action_gauche,"<")
+        button11 = self.create_button(1,1,self.action_stop,"stop")
+        button12 = self.create_button(1,2,self.action_droite,">")
+        button20 = self.create_button(2,0,self.action_rot_horaire,chr(26))
+        button21 = self.create_button(2,1,self.action_arriere,"v")
+        button22 = self.create_button(2,2,self.action_plonger,chr(25))
+
+
 
 
