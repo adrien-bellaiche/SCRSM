@@ -212,7 +212,7 @@ class Application(Thread,Frame):
             saved_file.close()
 
         def set_params_in_physique():
-            self.moteur.obstacles.append(Pave(0,0,0,0,0,0, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
+            self.moteur.obstacles.append(Piscine(-self.param_FormPisci[2]*0.5, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
             if self.checks[0] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
                 if self.param_balleRou[4] == 1: # rouge
