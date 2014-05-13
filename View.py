@@ -177,10 +177,7 @@ class Sight(Thread):
         pygame.display.set_mode((640,480), video_flags)
         self.resize((640,480))
         self.prep()
-        while not self.moteur.running:
-            sleep(0.1)
-            
-        while self.moteur.running:
+        while self.running:
             self.draw()    
             pygame.display.flip()
             frames+=1
@@ -190,6 +187,8 @@ class Sight(Thread):
         '''
         self.log("fps:  %d" % ((frames*1000)/(pygame.time.get_ticks()-ticks)))
 
+    def stop(self):
+        self.running = False
 
     def draw(self):                             # OK
         """ Fonction de rafraichissement de l'affichage
