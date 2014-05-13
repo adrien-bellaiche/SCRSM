@@ -324,3 +324,12 @@ class Pave(ObjetPhysique):
         #longueur selon x, largeur selon y, hauteur selon z (de base)
         super().__init__(x, y, z, theta, phi, psi, lo, la, he)
 
+class Piscine(ObjetPhysique):
+    def __init__(self, x, y, z, lo, la, he):
+        #longueur selon x, largeur selon y, hauteur selon z (de base)
+        super().__init__(x, y, z, 0, 0, 0, lo, la, he)
+
+    def collides_with(self, target):
+        pass
+
+
