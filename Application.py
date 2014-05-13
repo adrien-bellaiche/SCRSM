@@ -52,10 +52,11 @@ class Application(Thread,Frame):
         self.param_FormTube_Actif=IntVar()          # boolean pour verifier si le checkbox is croché
         self.update()
         self.bool_camera = IntVar()
+        self.numTuyau = 0
 
     def run(self):
         self.master.mainloop()
-        print("done")
+        print("Application.run : done")
 
     def update(self):       # mise a jour des datas
         self.dataCAP.set(str(self.robot.orientation[2]))
@@ -169,7 +170,7 @@ class Application(Thread,Frame):
         ligneButton     = 5
 
         boxTaille       = 5     # taille du boite pour inserer les parametre de la config
-        self.numTuyau   = 0     # variable qui compte combien de tuyau exist
+        
         self.tuyau = []         # vecteur qui stocke les parametres des tuyaus
 
 
@@ -230,11 +231,10 @@ class Application(Thread,Frame):
                     self.moteur.obstacles[-1].texture=[0,1,0]
             if self.checks[2] == 1:
                 self.moteur.obstacles.append(Cylindre(self.param_FormTube[0:8]))
-            if not not self.param_tubes:
-                for i in range(0,len(self.param_tubes)-8,8):
+            if self.numTuyau:
+                for i in range(0,len(self.param_tubes),8):
                     self.moteur.obstacles.append(Cylindre(self.param_tubes[i:i+8]))
-
-
+                    
         def press_ok():
             get_param()
             set_params_in_physique()
@@ -706,14 +706,6 @@ class Application(Thread,Frame):
         vue=Sight(self.moteur,v.get())
         vue.start()
         self.inited=True
-        self.robot.center[2]=-2
-        angle=0
-        while True:
-            sleep(0.1)
-            self.robot.center[0]=cos(angle)-2
-            self.robot.center[1]=sin(angle)
-            self.robot.orientation[2]=angle+pi/2
-            angle+=0.1
 
 
 class button_config():
