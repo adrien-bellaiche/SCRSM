@@ -223,7 +223,7 @@ class Sight(Thread):
         #texturefile = os.path.join(name)
         texturefile = os.path.join('textures', name)
         if os.path.exists(texturefile):
-            print("Loading :",texturefile)
+            #print("Loading :",texturefile)
             textureSurface = pygame.image.load(texturefile) 
             if not textureSurface: # A verifier aussi
                 self.log("FAILURE texture load attempt " + str(name))
