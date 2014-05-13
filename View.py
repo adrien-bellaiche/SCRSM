@@ -76,7 +76,7 @@ def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     if (textures != -1):
         glColor3f(1,1,1)    
         glBindTexture( GL_TEXTURE_2D, textures['fond'] )
-        B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(2,0); V(-L, l,-h);glTexCoord2d(2,1); V(-L,-l,-h); E() # dessous
+        B(GL_QUADS); glTexCoord2d(0,2); V( L,-l,-h); glTexCoord2d(0,0); V( L, l,-h);glTexCoord2d(4,0); V(-L, l,-h);glTexCoord2d(4,2); V(-L,-l,-h); E() # dessous
         glBindTexture( GL_TEXTURE_2D, textures['mur'] )
         B(GL_QUADS); glTexCoord2d(0,1); V( L,-l,-h); glTexCoord2d(0,0); V( L,-l, h);glTexCoord2d(1,0); V( L, l, h);glTexCoord2d(1,1); V( L, l,-h); E() # face arriere
         B(GL_QUADS); glTexCoord2d(0,1); V( L, l, h); glTexCoord2d(0,0); V(-L, l, h);glTexCoord2d(1,0); V(-L, l,-h);glTexCoord2d(1,1); V( L, l,-h); E() # face avd
