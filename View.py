@@ -33,7 +33,10 @@ def boite(L,l,h,couleur=[1,0.5,0],textures=-1):             # centree en G    OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
-    key=textures.keys()
+    if textures==-1:
+        key=[]
+    else:
+        key=textures.keys()
     if 'haut.jpg' in key and 'bas.jpg' in key and 'gauche.jpg' in key and 'droite.jpg' in key and 'av.jpg' in key and 'arr.jpg' in key:
         #glEnable(GL_TEXTURE_2D)
         glColor3f(1,1,1)    
