@@ -33,7 +33,10 @@ def boite(L,l,h,couleur=[1,0.5,0],textures=-1):             # centree en G    OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
-    key=textures.keys()
+    if textures==-1:
+        key=[]
+    else:
+        key=textures.keys()
     if 'haut.jpg' in key and 'bas.jpg' in key and 'gauche.jpg' in key and 'droite.jpg' in key and 'av.jpg' in key and 'arr.jpg' in key:
         #glEnable(GL_TEXTURE_2D)
         glColor3f(1,1,1)    
@@ -69,7 +72,6 @@ def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
     """
     L/=2;  l/=2;  h/=2                  #  on resonne en +/- L et pas en +/- L/2
     V=glVertex3f;  B=glBegin; E=glEnd
-    glTranslatef(0,0,-h)                # /!\ necessaire pour avoir le haut de la piscine en z=0
     
     if (textures != -1):
         glColor3f(1,1,1)    
@@ -128,9 +130,6 @@ class Sight(Thread):
         glEnable(GL_TEXTURE_2D)
         glShadeModel(GL_SMOOTH)
         # Ici loader les differentes textures. (surfaces du robot, bords de piscine, ...)
-        #self.load_textures("0.png")
-        #self.load_textures("robot.png")
-        #self.load_textures("piscine.png")
         if os.path.exists("textures"):
             self.textures = {}
             self.textures['']=-1
@@ -209,12 +208,12 @@ class Sight(Thread):
             self.cylinderConstructor(obstacle)
         elif(obstacle.__class__.__name__=="Sphere"):
             self.sphereConstructor(obstacle)
-        elif(obstacle.base[0]>10): # alors l obstacle est la piscine
+        elif(obstacle.__class__.__name__=="Piscine"):
             self.piscineConstructor(obstacle)
         else:
             self.paveConstructor(obstacle)
     
-    def load_textures(self, name):              # a revoir
+    def load_textures(self, name):              # OK
         """ Chargement d'une texture
             Dans le dossier "textures", cherche l'image dont le nom est en parametre
             La fonction incremente automatiquement le nombre de textures que le serveur connaisse
@@ -405,24 +404,24 @@ class Sight(Thread):
             glRotatef(rz   , 0.0, 0.0, 1.0)
             boite(lo,la,he,pave.texture)
             
-    def piscineConstructor(self,pave):          # OK
+    def piscineConstructor(self,piscine):          # OK
         """ Dessin de la piscine
-            Construit un pave
+            Construit une piscine
             param :
-                pave -- objet physique dont on recupere les caracteristiques physiques : translation, rotation, dimensions
+                piscine -- objet physique
         """
-        if not isinstance(pave,Pave):
-            self.log("FAILURE : attempt to draw a " + pave.__class__.__name__ + " as a Pave")
+        if not isinstance(piscine,Piscine):
+            self.log("FAILURE : attempt to draw a " + piscine.__class__.__name__ + " as a Piscine")
             return 0
         glLoadIdentity()
-        if (pave.texture==0):
+        if (piscine.texture==0):
             glColor3f(1,0,1)
         else :
-            glColor3f(pave.texture[0],pave.texture[1],pave.texture[2])
-        [lo,la,he]  = pave.base
-        [rx, ry, rz]= pave.orientation
+            glColor3f(piscine.texture[0],piscine.texture[1],piscine.texture[2])
+        [lo,la,he]  = piscine.base
+        [rx, ry, rz]= piscine.orientation
         rx*=180/pi;ry*=180/pi;rz*=180/pi
-        [s0,s1,s2]  = pave.center
+        [s0,s1,s2]  = piscine.center
         [r0,r1,r2]=self.moteur.robot.center
         [phi,theta,psi]= self.moteur.robot.orientation
         phi*=180/pi;theta*=180/pi;psi*=180/pi
