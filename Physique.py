@@ -345,6 +345,6 @@ class Piscine(ObjetPhysique):
             contrib = 0
             for w in range(3):
                 contrib += target.base[w]/2 * dot(p[w], us[w])
-            if contrib>=ra:
+            if contrib >= ra:
                 return True
         return False
