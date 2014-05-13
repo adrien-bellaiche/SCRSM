@@ -241,9 +241,9 @@ class ObjetPhysique():
         if isinstance(target, ObjetPhysique):
             inter = False
             for k in range(3):
-                inter |= intersect(self.hitbox[k], target.hitbox[k])
-            if inter:
-                return target.accurate_collision(self)
+                inter &= intersect(self.hitbox[k], target.hitbox[k])
+                if inter:
+                    return target.accurate_collision(self)
         else:
             print("Recherche de collision avec un objet non physique")
             return True
@@ -325,11 +325,10 @@ class Pave(ObjetPhysique):
         super().__init__(x, y, z, theta, phi, psi, lo, la, he)
 
 class Piscine(ObjetPhysique):
-    def __init__(self, x, y, z, lo, la, he):
+    def __init__(self, z, lo, la, he):
         #longueur selon x, largeur selon y, hauteur selon z (de base)
-        super().__init__(x, y, z, 0, 0, 0, lo, la, he)
+        super().__init__(0, 0, z, 0, 0, 0, lo, la, he)
 
     def collides_with(self, target):
-        pass
-
-
+        for k in range(5): #test du plan en -x, x,-y,y,-z.
+            ra = self.base[k%3]*((2*int(k/3))-1)/2.0  #TGCM
