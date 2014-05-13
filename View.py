@@ -177,7 +177,10 @@ class Sight(Thread):
         pygame.display.set_mode((640,480), video_flags)
         self.resize((640,480))
         self.prep()
-        while self.running:
+        while not self.moteur.running:
+            sleep(0.1)
+            
+        while self.moteur.running:
             self.draw()    
             pygame.display.flip()
             frames+=1
