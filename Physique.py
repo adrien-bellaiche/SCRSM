@@ -1,5 +1,6 @@
 __author__ = 'Adrien'
 from math import *
+import time
 
 def mat_rot(phi, theta, psi,R_v_TO_R_r=False):
     """renvoie la matrice de rotation 3x3 correspondant a phi selon x + theta selon y + psi selon z"""
@@ -325,10 +326,25 @@ class Pave(ObjetPhysique):
         super().__init__(x, y, z, theta, phi, psi, lo, la, he)
 
 class Piscine(ObjetPhysique):
+    alreadyHere = False
     def __init__(self, z, lo, la, he):
-        #longueur selon x, largeur selon y, hauteur selon z (de base)
-        super().__init__(0, 0, z, 0, 0, 0, lo, la, he)
+        if(Piscine.alreadyHere):
+            print("Another pool has been created.")
+            time.sleep(700)
+            print("Moron.")
+        else:
+            #longueur selon x, largeur selon y, hauteur selon z (de base)
+            super().__init__(0, 0, z, 0, 0, 0, lo, la, he)
+            Piscine.alreadyHere = True
 
     def collides_with(self, target):
+        p =[[1, 0, 0],[0, 1, 0],[0, 0, 1]]
+        us = [rotation(p[0], target.mat), rotation(p[1], target.mat), rotation(p[2], target.mat)]
         for k in range(5): #test du plan en -x, x,-y,y,-z.
-            ra = self.base[k%3]*((2*int(k/3))-1)/2.0  #TGCM
+            ra = abs(target.center[k%3] - self.base[k%3]*((2*int(k/3))-1)/2.0)  #TGCM #C'est la distance entre le plan de la piscine testée et le centre du robot
+            contrib = 0
+            for w in range(3):
+                contrib += target.base[w]/2 * dot(p[w], us[w])
+            if contrib>=ra:
+                return True
+        return False
