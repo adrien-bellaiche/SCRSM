@@ -55,6 +55,7 @@ class Simulateur(Thread):
     def run(self):
         self.started = True
         self.physique.start()
+        Commandes.en_arriere(self.server,10,duree=-1)
         #self.server.start()
         while self.started:
             self.log()
