@@ -71,7 +71,7 @@ class MoteurPhysique(Thread):
         #print("Serveur initialise :",self.serveur.store[0:6],"...")
         global CONSTANTES; [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
         #print("getEtatRobot('Rr')",self.getEtatRobot('Rr'))
-        self.robot.setEtat([0,0,0,0,0,0, 0,0,0,0,0,0])
+        #self.robot.setEtat([0,0,0,0,0,0, 0,0,0,0,0,0])
         print("getEtatRobot('Rr')",troncature(self.getEtatRobot('Rr')))
         print("getEtatRobot('Rv')",troncature(self.getEtatRobot('Rv')))
         print("Propulsion :",self.propulsion())

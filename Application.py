@@ -705,8 +705,8 @@ class Application(Thread,Frame):
         Commande(self.simu)
         print("DEMARRAGE")
         self.button_arret.config(state=NORMAL)
-        #vue=Sight(self.moteur,v.get())
-        #vue.start()
+        vue=Sight(self.moteur,v.get())
+        vue.start()
         self.inited=True
 
 
@@ -801,23 +801,23 @@ class Commande(Thread,Frame):
         self.simu = simulation
 
     def action_monter(self):
-        Commandes.en_haut(self.simu.server,10,1)
+        Commandes.en_haut(self.simu.server,20,1)
     def action_plonger(self):
-        Commandes.en_bas(self.simu.server,10,-1)
+        Commandes.en_bas(self.simu.server,20,-1)
     def action_avant(self):
-        Commandes.en_avant(self.simu.server,10,-1)
+        Commandes.en_avant(self.simu.server,20,-1)
     def action_arriere(self):
-        Commandes.en_arriere(self.simu.server,10,-1)
+        Commandes.en_arriere(self.simu.server,20,-1)
     def action_droite(self):
-        Commandes.crabe_droite(self.simu.server,10,-1)
+        Commandes.crabe_droite(self.simu.server,20,-1)
     def action_gauche(self):
-        Commandes.crabe_gauche(self.simu.server,10,-1)
+        Commandes.crabe_gauche(self.simu.server,20,-1)
     def action_rot_antihoraire(self):
-        Commandes.a_gauche(self.simu.server,10,-1)
+        Commandes.a_gauche(self.simu.server,20,-1)
     def action_rot_horaire(self):
-        Commandes.a_droite(self.simu.server,10,-1)
+        Commandes.a_droite(self.simu.server,20,-1)
     def action_stop(self):
-        Commandes.stop()
+        Commandes.stop(self.simu.server)
 
 
     def create_button(self,ligne,colonne,action, texte):
@@ -827,7 +827,6 @@ class Commande(Thread,Frame):
 
 
     def create_win_commande(self):
-
         button00 = self.create_button(0,0,self.action_monter,chr(24))
         button01 = self.create_button(0,1,self.action_avant,"^")
         button02 = self.create_button(0,2,self.action_rot_antihoraire,chr(27))
