@@ -18,6 +18,9 @@ from sys import argv
 #from Simulateur import define_file
 ''' la camera a un angle d'ouverture de 45 degres de base mais c est reglable '''
 
+global survol
+survol = 0
+
 def date():
     # renvoie un str sous ce format : "[DDMmmYY-HHMMSS] "
     h=asctime()
@@ -181,11 +184,20 @@ class Sight(Thread):
             self.draw()    
             pygame.display.flip()
             frames+=1
-
-        ''' display loop 
-            # Inserer ici les commandes pour generer le flux video via camera virtuelle
-        '''
+            
+            event = pygame.event.poll()
+            if event.type == KEYDOWN:
+                if self.handle_keys(event.key) == 0:
+                    self.running=False
+            if event.type == QUIT:
+                self.running=False
+            sleep(self.moteur.framerate*0.5)
+            ''' display loop 
+                # Inserer ici les commandes pour generer le flux video via camera virtuelle'''
+            
+            ''''''
         self.log("fps:  %d" % ((frames*1000)/(pygame.time.get_ticks()-ticks)))
+        self.stop()
 
     def stop(self):
         self.running = False
@@ -254,12 +266,13 @@ class Sight(Thread):
         if self.camera :
             pass
         else:
+            global survol
             glLoadIdentity()
             [lo,la,he]  = robot.base
             [rx, ry, rz]= robot.orientation
             [x,y,z]     = robot.center
             rx*=180/pi;ry*=180/pi;rz*=180/pi        # OpenGL travaille en degres.
-            glTranslatef(x,y,z) 
+            glTranslatef(x,y,z+survol) #glTranslatef(x,y,z) 
             glRotatef(rx, 1.0, 0.0, 0.0); glRotatef(ry , 0.0, 1.0, 0.0); glRotatef(rz , 0.0, 0.0, 1.0)
             glTranslatef(0.5*lo,0,0)
             glColor3f(0.3,0.3,0.9)
@@ -268,7 +281,17 @@ class Sight(Thread):
             glTranslatef(-0.5*lo,0,0)
             boite(lo,la,he,[1,1,0],self.textures)
             
+    def handle_keys(self,key):
+        global survol
+        
+        if key==K_ESCAPE:
+            return 0
+        if key==K_UP:
+            survol+=0.5
+        if key==K_DOWN:
+            survol-=0.5
 
+        return 1
 
 
     def cylinderConstructor(self, cylindre):    # OK
@@ -296,11 +319,11 @@ class Sight(Thread):
         [phi,theta,psi]= self.moteur.robot.orientation
         phi*=180/pi;theta*=180/pi;psi*=180/pi
         
-        
+        global survol
         glLoadIdentity()
         ''' Il est obligatoire de dessiner le cylindre en deux moities sinon une rotation de 180 deg l'emmene a perpet les oies '''
         if not self.camera: #ici la cylindre est fixe : vue du dessus
-            glTranslatef(cylindre.center[0], cylindre.center[1],cylindre.center[2])
+            glTranslatef(cylindre.center[0], cylindre.center[1],cylindre.center[2]+survol)#glTranslatef(cylindre.center[0], cylindre.center[1],cylindre.center[2])
             glRotatef(rx   , 1.0, 0.0, 0.0)
             glRotatef(ry   , 0.0, 1.0, 0.0)
             glRotatef(rz   , 0.0, 0.0, 1.0)
@@ -345,6 +368,7 @@ class Sight(Thread):
         rayon   = sphere.rayon
         slices = 16     # 16 ?
         stacks = 16
+        global survol
         if (sphere.texture==0):
             sphere.texture=[1,0,1]
         glColor3f(sphere.texture[0],sphere.texture[1],sphere.texture[2])
@@ -354,7 +378,7 @@ class Sight(Thread):
         phi*=180/pi;theta*=180/pi;psi*=180/pi
         glLoadIdentity()
         if not self.camera: #ici la sphere est fixe
-            glTranslatef(sphere.center[0], sphere.center[1],sphere.center[2])
+            glTranslatef(sphere.center[0], sphere.center[1],sphere.center[2]+survol)#glTranslatef(sphere.center[0], sphere.center[1],sphere.center[2])
             sph=gluNewQuadric()
             gluSphere(sph,rayon,slices,stacks)      # la sphere
         else : #vue de la camera donc la sphere est vue mobile par le robot
@@ -412,6 +436,7 @@ class Sight(Thread):
             param :
                 piscine -- objet physique
         """
+        global survol
         if not isinstance(piscine,Piscine):
             self.log("FAILURE : attempt to draw a " + piscine.__class__.__name__ + " as a Piscine")
             return 0
@@ -429,7 +454,7 @@ class Sight(Thread):
         phi*=180/pi;theta*=180/pi;psi*=180/pi
         
         if not self.camera:
-            glTranslatef(s0,s1,s2)
+            glTranslatef(s0,s1,s2+survol)#glTranslatef(s0,s1,s2)
             glRotatef(rx, 1.0, 0.0, 0.0); glRotatef(ry , 0.0, 1.0, 0.0); glRotatef(rz , 0.0, 0.0, 1.0)
             pisc(lo,la,he,textures=self.textures)
         else :        

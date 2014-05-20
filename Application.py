@@ -63,9 +63,9 @@ class Application(Thread,Frame):
         print("Application.run : done")
 
     def update(self):       # mise a jour des datas
-        self.dataCAP.set(str(self.robot.orientation[2]))
-        self.dataRoulis.set(str(self.robot.orientation[0]))
-        self.dataTangage.set(str(self.robot.orientation[1]))
+        self.dataCAP.set(str(int(self.robot.orientation[2]*100)/100.))
+        self.dataRoulis.set(str(int(self.robot.orientation[0]*100)/100.))
+        self.dataTangage.set(str(int(self.robot.orientation[1]*100)/100.))
         self.dataProf.set(str(self.robot.center[2]))
 
         self.master.after(200,self.update)
