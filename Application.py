@@ -42,7 +42,7 @@ class Application(Thread,Frame):
         self.isConfigDefault = FALSE    # boolean qui indique si la configuration est default ou est le sauvegade pour le utilisateur
         self.config_saved=[]            # vector qui sauvegarde les parametres de la configuration
         self.isOk = IntVar()            # boolean qui indique si les parametres de la config ont été remplis correctement
-        self.maxMinPisci = [100,1300,100,700,5,50]  # taille min et max de la piscine
+        self.maxMinPisci = [2,50,2,50,2,50]  # taille min et max de la piscine
         self.ball_color1 = IntVar()
         self.ball_color2 = IntVar()
         self.param_FormPisci = []                   # vecteur qui contien les parametre de la piscine
@@ -115,7 +115,13 @@ class Application(Thread,Frame):
     def onExitYes(self):
         self.master.destroy()
 
-
+    def centrefenetre(fen):
+        def geoliste(g):
+            r=[i for i in range(0,len(g)) if not g[i].isdigit()]
+            return [int(g[0:r[0]]),int(g[r[0]+1:r[1]]),int(g[r[1]+1:r[2]]),int(g[r[2]+1:])]
+        fen.update_idletasks()
+        l,h,x,y=geoliste(fen.geometry())
+        fen.geometry("%dx%d%+d%+d" % (200,120,(fen.winfo_screenwidth()-l)//2,(fen.winfo_screenheight()-h)//2))
 
     def onExit(self):      # fenetre pour verifier la fermeture du simulateur
         def centrefenetre(fen):
@@ -212,7 +218,10 @@ class Application(Thread,Frame):
             self.defa_tuyau = self.defa_tuyau[0].split(',')
             saved_file.close()
 
+
+
         def set_params_in_physique():
+            self.moteur.obstacles=[] # enleve les obejets deja crees
             self.moteur.obstacles.append(Piscine(-self.param_FormPisci[2]*0.5, self.param_FormPisci[0],self.param_FormPisci[1],self.param_FormPisci[2]))
             if self.checks[0] == 1:
                 self.moteur.obstacles.append(Sphere(self.param_balleRou[0:4]))
@@ -236,12 +245,46 @@ class Application(Thread,Frame):
                 for i in range(0,len(self.param_tubes),8):
                     self.moteur.obstacles.append(Cylindre(self.param_tubes[i:i+8]))
 
+        def centrefenetre(fen):
+            def geoliste(g):
+                r=[i for i in range(0,len(g)) if not g[i].isdigit()]
+                return [int(g[0:r[0]]),int(g[r[0]+1:r[1]]),int(g[r[1]+1:r[2]]),int(g[r[2]+1:])]
+            fen.update_idletasks()
+            l,h,x,y=geoliste(fen.geometry())
+            fen.geometry("%dx%d%+d%+d" % (200,110,(fen.winfo_screenwidth()-l)//2,(fen.winfo_screenheight()-h)//2))
+
         def press_ok():
             get_param()
-            set_params_in_physique()
-            self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
-            press_config_save()                             # sauveguarde des parametres
-            win.destroy()                                   # ferme la fenetre config
+            if self.isOk == 1:
+                set_params_in_physique()
+                self.button_demarrage.config(state = NORMAL)    # active le bouton demarrage
+                press_config_save()                             # sauveguarde des parametres
+                win.destroy()                                   # ferme la fenetre config
+            else:
+                top = Toplevel()
+                top.title("Errour")
+                top.focus_set()
+                centrefenetre(top)
+                if self.isOk == 2:
+                    msg = Message(top, text="Verifiez les valeurs de la piscine")
+                    msg.pack()
+                elif self.isOk == 3:
+                    msg = Message(top, text="Verifiez les valeurs des ballons")
+                    msg.pack()
+                elif self.isOk == 4:
+                    msg = Message(top, text="Verifiez les valeurs des tuyau")
+                    msg.pack()
+                elif self.isOk == 6:
+                    msg = Message(top, text="Verifiez les valeurs de la piscine et des ballons")
+                    msg.pack()
+                elif self.isOk == 8:
+                    msg = Message(top, text="Verifiez les valeurs de la piscine et des tuyaux")
+                    msg.pack()
+                else:
+                    msg = Message(top, text="Verifiez les valeurs des ballons et des tuyaux")
+                    msg.pack()
+                buttonOK = Button(top, text="Ok", width = 10, command=top.destroy)
+                buttonOK.pack( padx = 10,pady = 10)
 
         def addTuyau():     # action du bouton + tuyau
             temp = ligneTuyau(win,5+self.numTuyau,colunne_config,boxTaille) # creation de une ligne dans la config pour inserer un nouveau tuyau
@@ -370,23 +413,24 @@ class Application(Thread,Frame):
                 win.formTuyauPhi.config(state = DISABLED)
 
 
+
         def PisciIsOk(x,y,z): # verification des dimensions de la piscine
             if (x>=self.maxMinPisci[0] and x<=self.maxMinPisci[1] and y>=self.maxMinPisci[2] and y<=self.maxMinPisci[3] and z>=self.maxMinPisci[4] and z<=self.maxMinPisci[5]):
                 return TRUE
             else:
-                return FALSE
+                return 2
 
         def balleIsOk(x,y,z,r,pisci): # verification des limite de balle par rapport la piscine
-            if (abs(x)<=pisci[0]/2-r and abs(y)<=pisci[1]/2-r and abs(z)>=0 and z<=pisci[2]):
+            if (abs(x)<pisci[0]/2 and abs(y)<=pisci[1]/2 and z<=0 and abs(z)<pisci[2] and r>=0 and r<=1) :
                 return TRUE
             else:
-                return FALSE
+                return 3
 
-        def tuyauIsOk(x,y,z,l,r,pisci): # verification des limite du tuyau par rapport la piscine
-            if (abs(x)<=pisci[0]/2-l-r and abs(y)<=pisci[1]/2-l/2-r and abs(z)>=0 and z<=pisci[2]):
+        def tuyauIsOk(x,y,z,r,l,pisci): # verification des limite du tuyau par rapport la piscine
+            if (abs(x)<pisci[0]/2 and abs(y)<=pisci[1]/2 and z<=0 and abs(z)<pisci[2] and r>=0 and r<=1):
                 return TRUE
             else:
-                return FALSE
+                return 4
 
         def get_param():
             #netoyage des parametres pour que n'ait pas repetition quand "cliquer" plusier fois dans le button ok
@@ -431,7 +475,7 @@ class Application(Thread,Frame):
             self.param_balleJau.append(win.posBallJauR.get())
             self.param_balleJau.append(self.ball_color2.get())
             self.param_balleJau = [float(i) for i in self.param_balleJau]
-            self.isOk = self.isOk*self.isOk*balleIsOk(self.param_balleJau[0],self.param_balleJau[1],self.param_balleJau[2],self.param_balleJau[3],self.param_FormPisci)
+            self.isOk = self.isOk*balleIsOk(self.param_balleJau[0],self.param_balleJau[1],self.param_balleJau[2],self.param_balleJau[3],self.param_FormPisci)
 
 
             self.param_FormTube.append(win.posTuyX.get())
@@ -442,7 +486,8 @@ class Application(Thread,Frame):
             self.param_FormTube.append(win.formTuyauTheta.get())
             self.param_FormTube.append(win.formTuyauPhi.get())
             self.param_FormTube.append(win.formTuyauPsi.get())
-
+            self.param_FormTube = [float(i) for i in self.param_FormTube]
+            self.isOk = self.isOk*tuyauIsOk(self.param_FormTube[0],self.param_FormTube[1],self.param_FormTube[2],self.param_FormTube[3],self.param_FormTube[4],self.param_FormPisci)
             # concaténation des parametres des tuyaus tenant compte le nombre de tuyau
             if (self.numTuyau>0):
                 for i in range(len(self.tuyau)):
@@ -454,9 +499,9 @@ class Application(Thread,Frame):
                     self.param_tubes.append(self.tuyau[i].formTuyauTheta.get())
                     self.param_tubes.append(self.tuyau[i].formTuyauPhi.get())
                     self.param_tubes.append(self.tuyau[i].formTuyauPsi.get())
-            self.param_FormTube = [float(i) for i in self.param_FormTube]
-            self.param_tubes = [float(i) for i in self.param_tubes]
-            self.isOk = self.isOk*tuyauIsOk(self.param_FormTube[0],self.param_FormTube[1],self.param_FormTube[2],self.param_FormTube[3],self.param_FormTube[4],self.param_FormPisci)
+                    self.param_tubes = [float(i) for i in self.param_tubes]
+                    self.isOk = self.isOk*tuyauIsOk(self.param_tubes[0],self.param_tubes[1],self.param_tubes[2],self.param_tubes[3],self.param_tubes[4],self.param_FormPisci)
+
 
 
             self.defa_checks = []
