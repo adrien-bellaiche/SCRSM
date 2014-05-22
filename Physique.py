@@ -187,7 +187,6 @@ class ObjetPhysique():
         self.center = [x, y, z]
         self.orientation = [phi, theta, psi]
         self.base = [a, b, c]
-        self.hitbox = [[0, 0], [0, 0], [0, 0]]
         self.update_global_box_angles()
         self.mat = mat_rot(phi,theta,psi)
         self.texture = 0  # default unspecified texture
@@ -209,42 +208,12 @@ class ObjetPhysique():
                  return False
         return True
 
-    def update_global_box_angles(self):
-        """ renvoie un tuple [xmin,xmax,ymin,ymax,zmin,zmax] donnant les positions max de l'objet b"""
-        self.mat = mat_rot(self.orientation[0], self.orientation[1], self.orientation[2])
-        corner1 = rotation([-self.base[0] / 2, -self.base[1] / 2, -self.base[2] / 2], self.mat)
-        corner2 = rotation([-self.base[0] / 2, -self.base[1] / 2, self.base[2] / 2], self.mat)
-        corner3 = rotation([-self.base[0] / 2, self.base[1] / 2, -self.base[2] / 2], self.mat)
-        corner4 = rotation([-self.base[0] / 2, self.base[1] / 2, self.base[2] / 2], self.mat)
-        corner5 = rotation([self.base[0] / 2, -self.base[1] / 2, -self.base[2] / 2], self.mat)
-        corner6 = rotation([self.base[0] / 2, -self.base[1] / 2, self.base[2] / 2], self.mat)
-        corner7 = rotation([self.base[0] / 2, self.base[1] / 2, -self.base[2] / 2], self.mat)
-        corner8 = rotation([self.base[0] / 2, self.base[1] / 2, self.base[2] / 2], self.mat)
-        xmin = min(corner1[0], corner2[0], corner3[0], corner4[0], corner5[0], corner6[0], corner7[0], corner8[0])
-        xmax = max(corner1[0], corner2[0], corner3[0], corner4[0], corner5[0], corner6[0], corner7[0], corner8[0])
-        ymin = min(corner1[1], corner2[1], corner3[1], corner4[1], corner5[1], corner6[1], corner7[1], corner8[1])
-        ymax = min(corner1[1], corner2[1], corner3[1], corner4[1], corner5[1], corner6[1], corner7[1], corner8[1])
-        zmin = min(corner1[2], corner2[2], corner3[2], corner4[2], corner5[2], corner6[2], corner7[2], corner8[2])
-        zmax = min(corner1[2], corner2[2], corner3[2], corner4[2], corner5[2], corner6[2], corner7[2], corner8[2])
-        xmin += self.center[0]
-        xmax += self.center[0]
-        ymin += self.center[1]
-        ymax += self.center[1]
-        zmin += self.center[2]
-        zmax += self.center[2]
-        self.hitbox = [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
-
     def get_global_sphere_radius(self):
         return sqrt(self.base[0] ** 2 + self.base[1] ** 2 + self.base[2] ** 2)
 
     def collides_with(self, target):
-        """ Returns True if collides with the target. Always update the hitbox before trying it """
         if isinstance(target, ObjetPhysique):
-            inter = False
-            for k in range(3):
-                inter &= intersect(self.hitbox[k], target.hitbox[k])
-                if inter:
-                    return target.accurate_collision(self)
+            return target.accurate_collision(self)
         else:
             print("Recherche de collision avec un objet non physique")
             return True
