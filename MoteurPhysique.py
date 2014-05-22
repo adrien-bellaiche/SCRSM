@@ -6,6 +6,7 @@ from time import sleep, time
 from math import *
 from scipy.integrate import ode
 global precision
+from Client import *
 precision = 1e4
 
 def RK3(h,X,f):    # f(t, y, parametres) donne xpoint
@@ -46,12 +47,11 @@ def troncature_matrice(matrice):    #checked
 
 	
 class MoteurPhysique(Thread):
-    def __init__(self,robot,server, framerate, max_depth, gravity, rho):
-        print(self.__class__.__name__,": __init__")
+    def __init__(self,robot,adr_serveur, framerate, max_depth, gravity, rho):
         super().__init__()
         # Récupération des paramètres
         self.robot = robot
-        self.serveur = server
+        self.client = ModClient(adr_serveur)
         self.framerate = framerate
         self.max_depth = max_depth
         self.g = gravity
@@ -68,7 +68,6 @@ class MoteurPhysique(Thread):
     def check(self):
         print("\n-- CHECK UP -- :",self.__class__.__name__)
         print("Position initialisee du robot :",self.robot.getPosition())
-        #print("Serveur initialise :",self.serveur.store[0:6],"...")
         global CONSTANTES; [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
         #print("getEtatRobot('Rr')",self.getEtatRobot('Rr'))
         #self.robot.setEtat([0,0,0,0,0,0, 0,0,0,0,0,0])
@@ -109,11 +108,14 @@ class MoteurPhysique(Thread):
         
     def run(self):
         global CONSTANTES
-        
         chrono=time()
-
-
-
+        
+        self.client.set_prop_front_left(0)
+        self.client.set_prop_front_right(0)
+        self.client.set_prop_rear_left(0)
+        self.client.set_prop_rear_right(0)
+        self.client.set_prop_vertical(0)
+        
         self.running = True
         while self.running:
             debut=time()
@@ -128,7 +130,9 @@ class MoteurPhysique(Thread):
             if pauze>0:
                 sleep(pauze)
             else :
-                print("En retard :",pauze)
+                #print("En retard :",-pauze)
+                #print('.',end='')
+                pass
             # else : si on est en retard, on fait quoi ?
         self.stop()
 
@@ -150,7 +154,7 @@ class MoteurPhysique(Thread):
         else :                  # bug volontaire
             return 0()
         
-    def f(self,t, y, parametres):
+    def f(self,t, y, parametres): # coefficient 4 arbitraire a revoir
         [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi]  = parametres            # on donne un nom aux paramètres
         [x,y,z,phi,theta,psi, u,v,w,p,q,r]  = y                     # on donne un nom à chaque composante de y /!\ ON NE TOUCHE PAS A y SURTOUT !
         SUM                                 = self.propulsion()
@@ -178,11 +182,16 @@ class MoteurPhysique(Thread):
         Fmaxv=40 # force des moteurs verticaux   à 100%, en N
         Fmaxh=30 # force des moteurs horizontaux à 100%, en N
         '''     '''
-        F_Prop = [self.serveur.get_prop_front_left()/100*Fmaxh,self.serveur.get_prop_front_right()/100*Fmaxh,self.serveur.get_prop_rear_left()/100*Fmaxh,self.serveur.get_prop_rear_right()/100*Fmaxh,self.serveur.get_prop_vertical()/100*Fmaxv,self.serveur.get_prop_vertical()/100*Fmaxv]
+        [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = self.client.getProp()
+        
+        print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v])
+        F_Prop = [cm_fl/100*Fmaxh,cm_fr/100*Fmaxh,cm_rl/100*Fmaxh,cm_rr/100*Fmaxh,cm_v/100*Fmaxv,cm_v/100*Fmaxv]
         # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
         SUM+=produit(Mat_MTi,F_Prop)
         return troncature(SUM)
+    
+    
     
     def apply_physics(self,newEtat_Rv):    # checked
         newEtat_Rv[0][3] %= (2*pi)

@@ -59,15 +59,14 @@ class Application(Thread,Frame):
 
 
     def run(self):
-        self.master.mainloop()
+        self.mainloop()
         print("Application.run : done")
 
     def update(self):       # mise a jour des datas
         self.dataCAP.set(str(int(self.robot.orientation[2]*100)/100.))
         self.dataRoulis.set(str(int(self.robot.orientation[0]*100)/100.))
         self.dataTangage.set(str(int(self.robot.orientation[1]*100)/100.))
-        self.dataProf.set(str(self.robot.center[2]))
-
+        self.dataProf.set(str(int(self.robot.center[2]*100)/100.))
         self.master.after(200,self.update)
 
     def create_menu(self):
@@ -747,7 +746,7 @@ class Application(Thread,Frame):
         lelele = button_config(win, ligneButton, press_ok,press_config_save,press_restore_default)
 
     def press_demarrage(self):
-        Commande(self.simu)
+        Commande(self.simu) #:debug
         print("DEMARRAGE")
         self.button_arret.config(state=NORMAL)
         vue=Sight(self.moteur,v.get())
@@ -846,23 +845,23 @@ class Commande(Thread,Frame):
         self.simu = simulation
 
     def action_monter(self):
-        Commandes.en_haut(self.simu.server,20,1)
+        Commandes.en_haut(self.simu.physique.client,20,1)
     def action_plonger(self):
-        Commandes.en_bas(self.simu.server,20,-1)
+        Commandes.en_bas(self.simu.physique.client,20,-1)
     def action_avant(self):
-        Commandes.en_avant(self.simu.server,20,-1)
+        Commandes.en_avant(self.simu.physique.client,20,-1)
     def action_arriere(self):
-        Commandes.en_arriere(self.simu.server,20,-1)
+        Commandes.en_arriere(self.simu.physique.client,20,-1)
     def action_droite(self):
-        Commandes.crabe_droite(self.simu.server,20,-1)
+        Commandes.crabe_droite(self.simu.physique.client,20,-1)
     def action_gauche(self):
-        Commandes.crabe_gauche(self.simu.server,20,-1)
+        Commandes.crabe_gauche(self.simu.physique.client,20,-1)
     def action_rot_antihoraire(self):
-        Commandes.a_gauche(self.simu.server,20,-1)
+        Commandes.a_gauche(self.simu.physique.client,20,-1)
     def action_rot_horaire(self):
-        Commandes.a_droite(self.simu.server,20,-1)
+        Commandes.a_droite(self.simu.physique.client,20,-1)
     def action_stop(self):
-        Commandes.stop(self.simu.server)
+        Commandes.stop(self.simu.physique.client)
 
 
     def create_button(self,ligne,colonne,action, texte):

@@ -11,7 +11,7 @@ from threading import Thread
 import os
 from math import cos,sin,pi
 
-from ServerTricked import *
+from Server import *
 from MoteurPhysique import *
 
 from sys import argv
@@ -195,12 +195,15 @@ class Sight(Thread):
             ''' display loop 
                 # Inserer ici les commandes pour generer le flux video via camera virtuelle'''
             
+            
+            
             ''''''
         self.log("fps:  %d" % ((frames*1000)/(pygame.time.get_ticks()-ticks)))
         self.stop()
 
     def stop(self):
         self.running = False
+        self.moteur.running = False
 
     def draw(self):                             # OK
         """ Fonction de rafraichissement de l'affichage

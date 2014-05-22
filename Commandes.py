@@ -1,56 +1,56 @@
 from time import sleep
 
-def en_bas(server,puissance=50,duree=3):
-    server.set_prop_vertical(puissance)
+def en_bas(client,puissance=50,duree=3):
+    client.set_prop_vertical(puissance)
     if duree > 0 :
         sleep(duree)
-        stop(server)
+        stop(client)
     
-def en_haut(server,puissance=50,duree=3):
-    en_bas(server,-puissance,duree)
+def en_haut(client,puissance=50,duree=3):
+    en_bas(client,-puissance,duree)
 
-def en_avant(server,puissance=50,duree=3):
-    server.set_prop_front_left(puissance)
-    server.set_prop_front_right(puissance)
-    server.set_prop_rear_left(-puissance)
-    server.set_prop_rear_right(-puissance)
-    server.set_prop_vertical(0)
+def en_avant(client,puissance=50,duree=3):
+    client.set_prop_front_left(puissance)
+    client.set_prop_front_right(puissance)
+    client.set_prop_rear_left(-puissance)
+    client.set_prop_rear_right(-puissance)
+    client.set_prop_vertical(0)
     if duree > 0 :
         sleep(duree)
-        stop(server)
+        stop(client)
 
-def en_arriere(server,puissance=50,duree=3):
-    en_avant(server,-puissance,duree)
+def en_arriere(client,puissance=50,duree=3):
+    en_avant(client,-puissance,duree)
 
-def crabe_droite(server,puissance=50,duree=3):
-    server.set_prop_front_left(puissance)
-    server.set_prop_front_right(-puissance)
-    server.set_prop_rear_left(-puissance)
-    server.set_prop_rear_right(puissance)
-    server.set_prop_vertical(0)
+def crabe_droite(client,puissance=50,duree=3):
+    client.set_prop_front_left(puissance)
+    client.set_prop_front_right(-puissance)
+    client.set_prop_rear_left(-puissance)
+    client.set_prop_rear_right(puissance)
+    client.set_prop_vertical(0)
     if duree > 0 :
         sleep(duree)
-        stop(server)
+        stop(client)
 
-def a_gauche(server,puissance=50,duree=3):
-    a_droite(server,-puissance,duree)
+def a_gauche(client,puissance=50,duree=3):
+    a_droite(client,-puissance,duree)
 
-def a_droite(server,puissance=50,duree=3):
-    server.set_prop_front_left(puissance)
-    server.set_prop_front_right(-puissance)
-    server.set_prop_rear_left(puissance)
-    server.set_prop_rear_right(-puissance)
-    server.set_prop_vertical(0)
+def a_droite(client,puissance=50,duree=3):
+    client.set_prop_front_left(puissance)
+    client.set_prop_front_right(-puissance)
+    client.set_prop_rear_left(puissance)
+    client.set_prop_rear_right(-puissance)
+    client.set_prop_vertical(0)
     if duree > 0 :
         sleep(duree)
-        stop(server)
+        stop(client)
 
-def crabe_gauche(server,puissance=50,duree=3):
-    crabe_droite(server,-puissance,duree)
+def crabe_gauche(client,puissance=50,duree=3):
+    crabe_droite(client,-puissance,duree)
     
-def stop(server):
-    server.set_prop_front_left(0)
-    server.set_prop_front_right(0)
-    server.set_prop_rear_left(0)
-    server.set_prop_rear_right(0)
-    server.set_prop_vertical(0)
+def stop(client):
+    client.set_prop_front_left(0)
+    client.set_prop_front_right(0)
+    client.set_prop_rear_left(0)
+    client.set_prop_rear_right(0)
+    client.set_prop_vertical(0)
