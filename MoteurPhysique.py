@@ -49,7 +49,7 @@ def troncature_matrice(matrice):    #checked
 class MoteurPhysique(Thread):
     def __init__(self,robot,adr_serveur, framerate, max_depth, gravity, rho):
         super().__init__()
-        # Récupération des paramètres
+        # RÃ©cupÃ©ration des paramÃ¨tres
         self.robot = robot
         self.client = ModClient(adr_serveur)
         self.framerate = framerate
@@ -115,12 +115,12 @@ class MoteurPhysique(Thread):
         self.client.set_prop_rear_left(0)
         self.client.set_prop_rear_right(0)
         self.client.set_prop_vertical(0)
-        print("/!\ ATTENTION : arret en cas de collisions : desactivé")
+        print("/!\ ATTENTION : arret en cas de collisions : desactivÃ©")
         self.running = True
         while self.running:
             debut=time()
             y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
-            self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
+            self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel Ã©tat du robot
             
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
@@ -156,8 +156,8 @@ class MoteurPhysique(Thread):
             return 0()
         
     def f(self,t, y, parametres): # coefficient 4 arbitraire a revoir
-        [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi]  = parametres            # on donne un nom aux paramètres
-        [x,y,z,phi,theta,psi, u,v,w,p,q,r]  = y                     # on donne un nom à chaque composante de y /!\ ON NE TOUCHE PAS A y SURTOUT !
+        [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi]  = parametres            # on donne un nom aux paramÃ¨tres
+        [x,y,z,phi,theta,psi, u,v,w,p,q,r]  = y                     # on donne un nom Ã  chaque composante de y /!\ ON NE TOUCHE PAS A y SURTOUT !
         SUM                                 = self.propulsion()
         #alpha et beta, angles d inclinaison entre vecteur vitesse reel selon if et le vecteur i
         if abs(u) <= 1e-2:
@@ -170,27 +170,27 @@ class MoteurPhysique(Thread):
             beta = asin(v/(sqrt(u*u+v*v+w*w)))
         up = 0 + (1.0/(3*m)) * ( SUM[0] - 0*(m-self.rho*V/3)*self.g*sin(theta)          - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*cos(alpha)    + m*(r*v-q*w))
         vp = 0 + (1.0/(3*m)) * ( SUM[1] + 0*(m-self.rho*V/3)*self.g*cos(theta)*sin(phi) - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*sin(beta)               + m*(p*w-r*u))
-        wp = 0 + (1.0/(3*m)) * ( SUM[2] - 0*(m-self.rho*V/3)*self.g*cos(theta)*cos(phi) - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)    + m*(q*u-p*v))    # remonte à 0.06m/s
+        wp = 0 + (1.0/(3*m)) * ( SUM[2] - 0*(m-self.rho*V/3)*self.g*cos(theta)*cos(phi) - (1/2)*self.rho*((l*e+e*h+l*h)/3)*Cd*sqrt(u*u+v*v+w*w)*cos(beta)*sin(alpha)    + m*(q*u-p*v))    # remonte Ã  0.06m/s
         pp = 0 #+(1.0/(3*I[0]) * (SUM[3] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(e+h)*l*abs(p)*p+(I[1]-I[2])*q*r))
         qp = 0 #+(1.0/(3*I[1]) * (SUM[4] - (1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+h)*e*q*q+(I[2]-I[0])*r*p))
-        rp = 0 +(1.0/(3*I[2]) * (SUM[5] - 4*(1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*copysign(r,r)*abs(r)+(I[0]-I[1])*p*q)) # coefficients à revoir, "x4" arbitraire
+        rp = 0 +(1.0/(3*I[2]) * (SUM[5] - 16*(1/2)*self.rho*(Ce/4)*((e*e+h*h)**(3/2))*(l+e)*h*copysign(r,r)*abs(r)+(I[0]-I[1])*p*q)) # coefficients Ã  revoir, "x4" arbitraire
         return [u,v,w,p,q,r,up,vp,wp,pp,qp,rp]
     
     def propulsion(self): # OK
         global CONSTANTES
         [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
         # vecteur des forces des propulseurs, coefficient multiplicatif a modifier
-        Fmaxv=40 # force des moteurs verticaux   à 100%, en N
-        Fmaxh=30 # force des moteurs horizontaux à 100%, en N
+        Fmaxv=40 # force des moteurs verticaux   Ã  100%, en N
+        Fmaxh=30 # force des moteurs horizontaux Ã  100%, en N
         '''     '''
         try :
-            [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = self.client.getProp()
+            [cm_fl,cm_fr,cm_rr,cm_rl,nothing,cm_v] = self.client.getProp()
         except :
             [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = [0,0,0,0,0,0]
         
         #: print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v]) #:
         F_Prop = [cm_fl/100*Fmaxh,cm_fr/100*Fmaxh,cm_rl/100*Fmaxh,cm_rr/100*Fmaxh,cm_v/100*Fmaxv,cm_v/100*Fmaxv]
-        # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
+        # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repÃ¨re Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
         SUM+=produit(Mat_MTi,F_Prop)
         return troncature(SUM)
@@ -208,10 +208,10 @@ class MoteurPhysique(Thread):
         self.robot.speed  = troncature(self.robot.speed)
         [phi,theta,psi]=newEtat_Rv[0][3:6]
         self.robot.mat=mat_rot(phi,theta,psi)
-        self.client.setValue(34,int(self.robot.orientation[2]%6.28)*360.0/6.28) #:
+        self.client.setValue(34,int((self.robot.orientation[2]%6.28)*360.0/6.28)*10) #:
     
     def chgtRepere(self,etat,Rr_Rv=True):   # checked
-        # change le repère dans lequel est exprimé le paramètre etat
+        # change le repÃ¨re dans lequel est exprimÃ© le paramÃ¨tre etat
         if Rr_Rv:
             [x,y,z,phi,theta,psi, u,v,w,p,q,r] = etat
             Pr_v = mat_rot(phi, theta, psi) # Matrice de passage de Rr vers Rv
