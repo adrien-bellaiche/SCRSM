@@ -115,7 +115,7 @@ class MoteurPhysique(Thread):
         self.client.set_prop_rear_left(0)
         self.client.set_prop_rear_right(0)
         self.client.set_prop_vertical(0)
-        
+        print("/!\ ATTENTION : arret en cas de collisions : desactivé")
         self.running = True
         while self.running:
             debut=time()
@@ -124,7 +124,8 @@ class MoteurPhysique(Thread):
             
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
-                self.running = False
+                #:self.running = False
+                print("collision") #:
             
             pauze=debut+self.framerate-time()
             if pauze>0:
@@ -182,7 +183,10 @@ class MoteurPhysique(Thread):
         Fmaxv=40 # force des moteurs verticaux   à 100%, en N
         Fmaxh=30 # force des moteurs horizontaux à 100%, en N
         '''     '''
-        [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = self.client.getProp()
+        try :
+            [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = self.client.getProp()
+        except :
+            [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = [0,0,0,0,0,0]
         
         #: print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v]) #:
         F_Prop = [cm_fl/100*Fmaxh,cm_fr/100*Fmaxh,cm_rl/100*Fmaxh,cm_rr/100*Fmaxh,cm_v/100*Fmaxv,cm_v/100*Fmaxv]
@@ -204,7 +208,7 @@ class MoteurPhysique(Thread):
         self.robot.speed  = troncature(self.robot.speed)
         [phi,theta,psi]=newEtat_Rv[0][3:6]
         self.robot.mat=mat_rot(phi,theta,psi)
-        #self.client.setValue(34,(self.robot.orientation[0]%6.28)*360.0/6.28) #:
+        self.client.setValue(34,int(self.robot.orientation[2]%6.28)*360.0/6.28) #:
     
     def chgtRepere(self,etat,Rr_Rv=True):   # checked
         # change le repère dans lequel est exprimé le paramètre etat

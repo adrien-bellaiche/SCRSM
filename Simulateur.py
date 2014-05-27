@@ -24,7 +24,7 @@ class Simulateur(Thread):
         #:self.maj_capteurs = Capteurs(self,self.robot)
         #self.robot.center[2]=-3 #!
         addr_serv='127.0.0.1'
-        if len(argv)>0:
+        if len(argv)>1:
             addr_serv = argv[1]
         self.server = ModbusServer(addr_serv)  # Serveur
         self.physique = MoteurPhysique(self.robot, addr_serv, 0.01, 50, 9.81, 1000)  # Moteur Physique
