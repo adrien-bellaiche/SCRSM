@@ -13,6 +13,7 @@ from math import cos,sin,pi
 
 from Server import *
 from MoteurPhysique import *
+from Capteurs import *
 
 from sys import argv
 #from Simulateur import define_file

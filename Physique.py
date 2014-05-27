@@ -282,6 +282,8 @@ class Robot(ObjetPhysique):
         return [x,y,z,phi,theta,psi, u,v,w,p,q,r]
     
     def setEtat(self,newEtat):
+        if newEtat[2]>0:
+            newEtat[2]=0
         self.center=newEtat[0:3]
         self.orientation=newEtat[3:6]
         self.speed=newEtat[6:9]

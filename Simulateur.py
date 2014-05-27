@@ -1,6 +1,7 @@
 from time import *
 import Commandes
 from Application import *
+from sys import argv
 
 __author__ = 'Adrien'
 
@@ -20,9 +21,13 @@ class Simulateur(Thread):
     def __init__(self):
         super().__init__()
         self.robot = Robot(0)
+        #:self.maj_capteurs = Capteurs(self,self.robot)
         #self.robot.center[2]=-3 #!
-        self.server = ModbusServer()  # Serveur
-        self.physique = MoteurPhysique(self.robot, '127.0.0.1', 0.01, 50, 9.81, 1000)  # Moteur Physique
+        addr_serv='127.0.0.1'
+        if len(argv)>0:
+            addr_serv = argv[1]
+        self.server = ModbusServer(addr_serv)  # Serveur
+        self.physique = MoteurPhysique(self.robot, addr_serv, 0.01, 50, 9.81, 1000)  # Moteur Physique
         self.window = Application(self)  # Interface Graphique
         self.window.start()
         self.started = False
@@ -53,6 +58,7 @@ class Simulateur(Thread):
         self.started = True
         self.physique.start()
         self.server.start()
+        #:self.maj_capteurs.start()
         Commandes.stop(self.physique.client)
         while self.started and self.physique.running:
             self.log()

@@ -9,12 +9,12 @@ from threading import Thread
 
 
 class ModbusServer(Thread):
-    def __init__(self):
+    def __init__(self,addr_serv):
         super().__init__()
         self.store = ModbusSlaveContext(ModbusSequentialDataBlock(0, range(48)))
         self.context = ModbusServerContext(slaves=self.store, single=True)
         framer = ModbusSocketFramer
-        self.server = ModbusTcpServer(self.context, framer, None, ('127.0.0.1', 502)) # A tester !
+        self.server = ModbusTcpServer(self.context, framer, None, (addr_serv, 502)) # A tester !
 
     def start(self):
         print("ModbusTCP Server started")

@@ -13,12 +13,15 @@ class Capteurs(Thread):
     def run(self):
         self.running = True
         while self.running:
+            print("alive")
             self.apply_depth()
             self.apply_cap()
+            time.sleep(0.1)
             # self.apply_currents()
 
     def apply_depth(self):
-        self.simulateur.server.setValue(33, -100*self.robot.center[2])
+        self.simulateur.physique.client.setValue(33, -100*self.robot.center[2])
+        print("MAJ prof :",-100*self.robot.center[2] )
 
     def apply_cap(self):
-        self.simulateur.server.setValue((self.simulateur.robot.orientation[0]%6.28)*360.0/6.28)
+        self.simulateur.physique.client.setValue(34,(self.simulateur.robot.orientation[0]%6.28)*360.0/6.28)

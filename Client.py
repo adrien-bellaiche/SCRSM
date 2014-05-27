@@ -42,11 +42,11 @@ class ModClient():
         return cmd
         
     def setValue(self, reg, value):
-        print("writes :",value,"@",reg) #:
+        #:print("writes :",value,"@",reg) #:
         try:
             answer=self.client.write_register(reg, value, unit=16)
         except:
-            print("Error writing on modbus")
+            print("Error writing on modbus",end='\t')
             answer=None
             pass
         return answer

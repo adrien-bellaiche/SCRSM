@@ -184,7 +184,7 @@ class MoteurPhysique(Thread):
         '''     '''
         [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = self.client.getProp()
         
-        print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v])
+        #: print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v]) #:
         F_Prop = [cm_fl/100*Fmaxh,cm_fr/100*Fmaxh,cm_rl/100*Fmaxh,cm_rr/100*Fmaxh,cm_v/100*Fmaxv,cm_v/100*Fmaxv]
         # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
@@ -200,9 +200,11 @@ class MoteurPhysique(Thread):
         newEtat_Rr=self.chgtRepere(newEtat_Rv,Rr_Rv=False)
         self.robot.setEtat(newEtat_Rr)
         self.robot.center = troncature(self.robot.center)
+        self.client.setValue(33, -int(self.robot.center[2]*100)) #:
         self.robot.speed  = troncature(self.robot.speed)
         [phi,theta,psi]=newEtat_Rv[0][3:6]
         self.robot.mat=mat_rot(phi,theta,psi)
+        #self.client.setValue(34,(self.robot.orientation[0]%6.28)*360.0/6.28) #:
     
     def chgtRepere(self,etat,Rr_Rv=True):   # checked
         # change le repère dans lequel est exprimé le paramètre etat
