@@ -7,6 +7,7 @@ from math import *
 from scipy.integrate import ode
 global precision
 from Client import *
+from VFUCapteurs import *
 precision = 1e4
 
 def RK3(h,X,f):    # f(t, y, parametres) donne xpoint
@@ -56,6 +57,7 @@ class MoteurPhysique(Thread):
         self.max_depth = max_depth
         self.g = gravity
         self.rho = rho
+        self.capteurs = Capteurs(adr_serveur)
         #
         self.obstacles = []
         self.collision=False
@@ -108,6 +110,8 @@ class MoteurPhysique(Thread):
         global CONSTANTES
         chrono=time()
         fichierVFU = open('fichierVFU.txt','w') #: VFU
+        with open(self.capteurs.fichier,'a') as f:
+            f.write(str(chrono)+'\n')
         self.client.set_prop_front_left(0)
         self.client.set_prop_front_right(0)
         self.client.set_prop_rear_left(0)
@@ -121,6 +125,7 @@ class MoteurPhysique(Thread):
             y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
             self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
             fichierVFU.write(str(time()-chrono)+" "+str(self.robot.orientation[2])+" "+str(accel[0])+" "+str(accel[1])+" "+str(accel[2])+"\n") #:
+            self.capteurs.get_all(time()-chrono)    #: VFU
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
                 #:self.running = False
