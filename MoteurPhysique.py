@@ -107,6 +107,7 @@ class MoteurPhysique(Thread):
     def run(self):
         global CONSTANTES
         chrono=time()
+        fichierVFU = open('fichierVFU.txt','w') #: VFU
         self.client.set_prop_front_left(0)
         self.client.set_prop_front_right(0)
         self.client.set_prop_rear_left(0)
@@ -116,8 +117,10 @@ class MoteurPhysique(Thread):
         self.running = True
         while self.running:
             debut=time()
+            accel = self.f(0    , self.getEtatRobot('Rv'), CONSTANTES)#: VFU
             y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
             self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
+            fichierVFU.write(str(time()-chrono)+" "+str(self.robot.orientation[2])+" "+str(accel[0])+" "+str(accel[1])+" "+str(accel[2])+"\n") #:
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
                 #:self.running = False
@@ -131,6 +134,7 @@ class MoteurPhysique(Thread):
                 #print('.',end='')
                 pass
             # else : si on est en retard, on fait quoi ?
+        fichierVFU.close() #: VFU
         self.stop()
 
     def stop(self):
