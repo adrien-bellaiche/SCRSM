@@ -25,8 +25,8 @@ def en_arriere(client,puissance=50,duree=3):
 def crabe_droite(client,puissance=50,duree=3):
     client.set_prop_front_left(puissance)
     client.set_prop_front_right(-puissance)
-    client.set_prop_rear_left(-puissance)
-    client.set_prop_rear_right(puissance)
+    client.set_prop_rear_left(puissance)
+    client.set_prop_rear_right(-puissance)
     client.set_prop_vertical(0)
     if duree > 0 :
         sleep(duree)
@@ -38,8 +38,8 @@ def a_gauche(client,puissance=50,duree=3):
 def a_droite(client,puissance=50,duree=3):
     client.set_prop_front_left(puissance)
     client.set_prop_front_right(-puissance)
-    client.set_prop_rear_left(puissance)
-    client.set_prop_rear_right(-puissance)
+    client.set_prop_rear_left(-puissance)
+    client.set_prop_rear_right(puissance)
     client.set_prop_vertical(0)
     if duree > 0 :
         sleep(duree)

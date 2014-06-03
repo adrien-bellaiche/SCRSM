@@ -97,11 +97,11 @@ def pisc(L,l,h,couleur=[0,1,1],textures=-1):                # OK
         B(GL_QUADS); V(-L,-l,-h);V(-L,-l, h);V(-L, l, h);V(-L, l,-h); E() #face avant
         
 class Sight(Thread):
-    def __init__(self, moteurPhysique,camera):  # a "potato.txt" pres, c'est ca
+    def __init__(self, moteurPhysique,camera): 
         super().__init__()
         self.moteur = moteurPhysique
         self.textures = -1
-        name = "potato.txt"  # generer un nom etant "graphiclog_date_heure.txt" je crois que j'ai deja fait ca dans le simu global
+        name = 'log-View.logsim' 
         self.logfile = os.path.join(name)
         self.log("New Sight: Hello")
         self.running=False

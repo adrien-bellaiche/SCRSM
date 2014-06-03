@@ -21,8 +21,6 @@ class Simulateur(Thread):
     def __init__(self):
         super().__init__()
         self.robot = Robot(0)
-        #:self.maj_capteurs = Capteurs(self,self.robot)
-        #self.robot.center[2]=-3 #!
         addr_serv='127.0.0.1'
         if len(argv)>1:
             addr_serv = argv[1]
@@ -58,7 +56,6 @@ class Simulateur(Thread):
         self.started = True
         self.physique.start()
         self.server.start()
-        #:self.maj_capteurs.start()
         Commandes.stop(self.physique.client)
         while self.started and self.physique.running:
             self.log()

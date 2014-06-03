@@ -69,8 +69,6 @@ class MoteurPhysique(Thread):
         print("\n-- CHECK UP -- :",self.__class__.__name__)
         print("Position initialisee du robot :",self.robot.getPosition())
         global CONSTANTES; [l,e,h,V,m,Cd,Ce,I,Mat_Ti,Mat_MTi] = CONSTANTES
-        #print("getEtatRobot('Rr')",self.getEtatRobot('Rr'))
-        #self.robot.setEtat([0,0,0,0,0,0, 0,0,0,0,0,0])
         print("getEtatRobot('Rr')",troncature(self.getEtatRobot('Rr')))
         print("getEtatRobot('Rv')",troncature(self.getEtatRobot('Rv')))
         print("Propulsion :",self.propulsion())
@@ -109,7 +107,6 @@ class MoteurPhysique(Thread):
     def run(self):
         global CONSTANTES
         chrono=time()
-        
         self.client.set_prop_front_left(0)
         self.client.set_prop_front_right(0)
         self.client.set_prop_rear_left(0)
@@ -121,7 +118,6 @@ class MoteurPhysique(Thread):
             debut=time()
             y=RK3(self.framerate,self.getEtatRobot('Rv'),self.f)                                 # on demande y(t+dt) dans Rv
             self.apply_physics(newEtat_Rv=y)                                 # on applique y(t+dt) comme nouvel état du robot
-            
             if self.detect_collisions():                                                # detection des colisions
                 self.collision=True
                 #:self.running = False
@@ -188,7 +184,6 @@ class MoteurPhysique(Thread):
         except :
             [cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v] = [0,0,0,0,0,0]
         
-        #: print("propulsion :",[cm_fl,cm_fr,cm_rl,cm_rr,nothing,cm_v]) #:
         F_Prop = [cm_fl/100*Fmaxh,cm_fr/100*Fmaxh,cm_rl/100*Fmaxh,cm_rr/100*Fmaxh,cm_v/100*Fmaxv,cm_v/100*Fmaxv]
         # remplissage de la matrice Mat_Ti comprenant selon les colonnes les vecteurs Ti dans le repère Rv, et de la matrice Mat_MTi des moments
         SUM=produit(Mat_Ti,F_Prop)
@@ -204,11 +199,11 @@ class MoteurPhysique(Thread):
         newEtat_Rr=self.chgtRepere(newEtat_Rv,Rr_Rv=False)
         self.robot.setEtat(newEtat_Rr)
         self.robot.center = troncature(self.robot.center)
-        self.client.setValue(33, -int(self.robot.center[2]*100)) #:
+        self.client.setValue(33, -int(self.robot.center[2]*100)) #: # MAJ capteur de profondeur
         self.robot.speed  = troncature(self.robot.speed)
         [phi,theta,psi]=newEtat_Rv[0][3:6]
         self.robot.mat=mat_rot(phi,theta,psi)
-        self.client.setValue(34,int((self.robot.orientation[2]%6.28)*360.0/6.28)*10) #:
+        self.client.setValue(34,int((self.robot.orientation[2]%6.28)*360.0/6.28)*10) #: # MAJ capteur de cap
     
     def chgtRepere(self,etat,Rr_Rv=True):   # checked
         # change le repère dans lequel est exprimé le paramètre etat
